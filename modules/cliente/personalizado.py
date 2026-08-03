@@ -1,9 +1,13 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from database.gimnasio import buscar_cliente_gym
+from database.planes import buscar_plan_cliente
 
 
+
+# ==========================================
+# MI PLAN PERSONALIZADO CLIENTE
+# ==========================================
 
 def mostrar_personalizado():
 
@@ -13,7 +17,9 @@ def mostrar_personalizado():
     )
 
 
+
     usuario = st.session_state["usuario"]
+
 
 
     cedula = str(
@@ -22,13 +28,18 @@ def mostrar_personalizado():
 
 
 
-    cliente = buscar_cliente_gym(
+    # ======================================
+    # BUSCAR PLAN
+    # ======================================
+
+    plan = buscar_plan_cliente(
         cedula
     )
 
 
 
-    if cliente.empty:
+    if plan.empty:
+
 
         st.info(
             "Actualmente no tienes un plan personalizado activo."
@@ -38,26 +49,20 @@ def mostrar_personalizado():
 
 
 
-    datos = cliente.iloc[0]
+    datos = plan.iloc[-1]
 
 
 
     st.subheader(
-        "Información del plan"
+        "📋 Información del plan"
     )
 
 
 
-    # --------------------------------
-    # PLAN
-    # --------------------------------
-
-
-    plan = datos.get(
-        "plan",
+    tipo_plan = datos.get(
+        "tipo_plan",
         "Personal Training"
     )
-
 
 
     fecha_inicio = datos.get(
@@ -66,12 +71,28 @@ def mostrar_personalizado():
     )
 
 
-
-    fecha_vencimiento = datos.get(
-        "fecha_vencimiento",
+    fecha_fin = datos.get(
+        "fecha_fin",
         ""
     )
 
+
+    estado = datos.get(
+        "estado",
+        "Activo"
+    )
+
+
+    observaciones = datos.get(
+        "observaciones",
+        ""
+    )
+
+
+
+    # ======================================
+    # DATOS PRINCIPALES
+    # ======================================
 
 
     col1,col2,col3 = st.columns(3)
@@ -80,7 +101,7 @@ def mostrar_personalizado():
 
     col1.metric(
         "🏋️ Tipo de Plan",
-        plan
+        tipo_plan
     )
 
 
@@ -91,8 +112,8 @@ def mostrar_personalizado():
 
 
     col3.metric(
-        "⏳ Vencimiento",
-        fecha_vencimiento
+        "⏳ Finaliza",
+        fecha_fin
     )
 
 
@@ -101,20 +122,51 @@ def mostrar_personalizado():
 
 
 
-    # --------------------------------
-    # ESTADO
-    # --------------------------------
+    # ======================================
+    # ESTADO DEL PLAN
+    # ======================================
+
+
+    st.subheader(
+        "📌 Estado"
+    )
+
+
+    if estado == "Activo":
+
+
+        st.success(
+            "🟢 Plan activo"
+        )
+
+
+    else:
+
+
+        st.warning(
+            f"Estado: {estado}"
+        )
+
+
+
+
+    # ======================================
+    # DÍAS RESTANTES
+    # ======================================
 
 
     try:
 
+
         vencimiento = datetime.strptime(
-            fecha_vencimiento,
+            fecha_fin,
             "%d-%m-%Y"
         ).date()
 
 
+
         hoy = datetime.today().date()
+
 
 
         dias = (
@@ -125,12 +177,14 @@ def mostrar_personalizado():
 
         if dias < 0:
 
+
             st.error(
-                "🔴 Tu plan personalizado está vencido."
+                "🔴 Tu plan está vencido."
             )
 
 
         elif dias <= 5:
+
 
             st.warning(
                 f"🟡 Tu plan vence en {dias} días."
@@ -139,15 +193,18 @@ def mostrar_personalizado():
 
         else:
 
+
             st.success(
-                f"🟢 Plan activo. Restan {dias} días."
+                f"🟢 Te quedan {dias} días de entrenamiento."
             )
+
 
 
     except:
 
+
         st.info(
-            "Estado pendiente de actualización."
+            "No fue posible calcular los días restantes."
         )
 
 
@@ -156,17 +213,41 @@ def mostrar_personalizado():
 
 
 
+    # ======================================
+    # OBSERVACIONES
+    # ======================================
+
+
     st.subheader(
-        "Información"
+        "📝 Observaciones del entrenador"
     )
 
 
-    st.write(
+
+    if observaciones:
+
+
+        st.info(
+            observaciones
+        )
+
+
+    else:
+
+
+        st.write(
+            "Sin observaciones registradas."
+        )
+
+
+
+    st.divider()
+
+
+
+    st.caption(
         """
         Tu entrenamiento personalizado es gestionado
         directamente por Julian Avila.
-
-        La fecha de vencimiento corresponde al periodo
-        contratado de 30 días.
         """
     )
