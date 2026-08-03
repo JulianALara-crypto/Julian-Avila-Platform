@@ -5,6 +5,29 @@ from database.gimnasio import buscar_cliente_gym
 
 
 
+def formatear_fecha(valor):
+
+    if valor is None:
+        return ""
+
+    try:
+
+        fecha = str(valor).split(" ")[0]
+
+        partes = fecha.split("-")
+
+        if len(partes) == 3:
+
+            return f"{partes[2]}-{partes[1]}-{partes[0]}"
+
+        return valor
+
+    except:
+
+        return valor
+
+
+
 def mostrar_perfil():
 
 
@@ -18,9 +41,13 @@ def mostrar_perfil():
 
     cedula = str(
         usuario["cedula"]
-    )
+    ).strip()
 
 
+
+    # =====================================
+    # INFORMACIÓN PERSONAL
+    # =====================================
 
     usuarios = cargar_usuarios()
 
@@ -59,8 +86,12 @@ def mostrar_perfil():
 
 
     st.subheader(
-        cliente["nombre_completo"]
+        cliente.get(
+            "nombre_completo",
+            "Cliente"
+        )
     )
+
 
 
     col1,col2 = st.columns(2)
@@ -69,13 +100,18 @@ def mostrar_perfil():
 
     with col1:
 
+
         st.write(
             "🪪 Cédula"
         )
 
         st.write(
-            cliente["cedula"]
+            cliente.get(
+                "cedula",
+                ""
+            )
         )
+
 
 
         st.write(
@@ -93,6 +129,7 @@ def mostrar_perfil():
 
     with col2:
 
+
         st.write(
             "🏥 EPS"
         )
@@ -105,14 +142,17 @@ def mostrar_perfil():
         )
 
 
+
         st.write(
             "📅 Fecha registro"
         )
 
         st.write(
-            cliente.get(
-                "fecha_registro",
-                ""
+            formatear_fecha(
+                cliente.get(
+                    "fecha_registro",
+                    ""
+                )
             )
         )
 
@@ -122,9 +162,15 @@ def mostrar_perfil():
 
 
 
+    # =====================================
+    # INFORMACIÓN MÉDICA
+    # =====================================
+
+
     st.subheader(
         "🩺 Información médica"
     )
+
 
 
     st.info(
@@ -140,13 +186,13 @@ def mostrar_perfil():
 
 
 
-    # ==============================
-    # INFORMACIÓN GYM
-    # ==============================
+    # =====================================
+    # INFORMACIÓN GIMNASIO
+    # =====================================
 
 
     st.subheader(
-        "🏋️ Mi Membresía"
+        "🏋️ Información de Plan"
     )
 
 
@@ -163,23 +209,113 @@ def mostrar_perfil():
         datos_gym = gym.iloc[0]
 
 
-        c1,c2 = st.columns(2)
+
+        col1,col2,col3 = st.columns(3)
 
 
-        c1.metric(
-            "Inicio",
-            datos_gym["fecha_ingreso"]
-        )
+
+        with col1:
+
+            st.metric(
+                "Fecha inicio",
+                formatear_fecha(
+                    datos_gym.get(
+                        "fecha_ingreso",
+                        ""
+                    )
+                )
+            )
 
 
-        c2.metric(
-            "Vencimiento",
-            datos_gym["fecha_vencimiento"]
-        )
+
+        with col2:
+
+            st.metric(
+                "Vencimiento",
+                formatear_fecha(
+                    datos_gym.get(
+                        "fecha_vencimiento",
+                        ""
+                    )
+                )
+            )
+
+
+
+        with col3:
+
+            dias = datos_gym.get(
+                "tipo_plan",
+                "Membresía"
+            )
+
+            st.metric(
+                "Plan",
+                dias
+            )
+
 
 
     else:
 
         st.info(
-            "No tienes una membresía registrada."
+            "No tienes una membresía registrada en gimnasio."
+        )
+
+
+
+    # =====================================
+    # PERSONAL TRAINING
+    # =====================================
+
+
+    st.divider()
+
+
+    st.subheader(
+        "💪 Personal Training"
+    )
+
+
+
+    if "fecha_inicio_personalizado" in cliente.index:
+
+
+        st.success(
+            "Tienes un plan personalizado activo."
+        )
+
+
+        c1,c2 = st.columns(2)
+
+
+
+        c1.metric(
+            "Inicio",
+            formatear_fecha(
+                cliente.get(
+                    "fecha_inicio_personalizado",
+                    ""
+                )
+            )
+        )
+
+
+
+        c2.metric(
+            "Vencimiento",
+            formatear_fecha(
+                cliente.get(
+                    "fecha_vencimiento_personalizado",
+                    ""
+                )
+            )
+        )
+
+
+
+    else:
+
+        st.info(
+            "No tienes un plan personalizado activo."
         )
