@@ -2,6 +2,7 @@ import streamlit as st
 
 from config.config import APP_NAME
 from auth.login import mostrar_login
+
 from modules.admin.dashboard import mostrar_dashboard
 from modules.admin.clientes import mostrar_clientes
 from modules.admin.pagos import mostrar_pagos
@@ -34,25 +35,20 @@ st.markdown(
         background-color:#000000;
     }
 
-
     h1,h2,h3,h4 {
         color:white !important;
         text-align:center;
     }
 
-
     p,label,.stMarkdown {
         color:#dddddd !important;
     }
-
 
     div[data-testid="stDecoration"] {
         display:none;
     }
 
-
     </style>
-
     """,
     unsafe_allow_html=True
 )
@@ -79,6 +75,7 @@ def panel_principal():
 
 
     usuario = st.session_state["usuario"]
+
 
 
     # ==================================
@@ -119,7 +116,9 @@ def panel_principal():
     )
 
 
+
     st.sidebar.divider()
+
 
 
     if st.sidebar.button(
@@ -133,7 +132,7 @@ def panel_principal():
 
 
     # ==================================
-    # CONTENIDO TEMPORAL
+    # CONTENIDO
     # ==================================
 
     st.title(
@@ -146,71 +145,83 @@ def panel_principal():
     )
 
 
+
+    # ==================================
+    # ADMINISTRADOR
+    # ==================================
+
     if usuario["rol"] == "Admin":
 
 
-    if seleccion == "📊 Dashboard":
+        if seleccion == "📊 Dashboard":
 
-        mostrar_dashboard()
-
-
-    elif seleccion == "👥 Clientes":
-
-        mostrar_clientes()
-
-
-    elif seleccion == "💳 Pagos y Contabilidad":
-
-        mostrar_pagos()
-
-
-    else:
-
-        st.info(
-            f"Módulo administrador: {seleccion}"
-        )
+            mostrar_dashboard()
 
 
 
-    else:
+        elif seleccion == "👥 Clientes":
 
-
-    if seleccion == "👤 Mi Perfil":
-
-        mostrar_perfil()
+            mostrar_clientes()
 
 
 
-    elif seleccion == "📏 Mis Medidas":
+        elif seleccion == "💳 Pagos y Contabilidad":
 
-
-        mostrar_evolucion()
-
-
-
-    elif seleccion == "📈 Mi Evolución":
-
-
-        mostrar_evolucion()
+            mostrar_pagos()
 
 
 
-    elif seleccion == "🏋️ Mi Plan Personalizado":
+        else:
+
+            st.info(
+                f"Módulo administrador: {seleccion}"
+            )
 
 
-        mostrar_personalizado()
 
-
+    # ==================================
+    # CLIENTE
+    # ==================================
 
     else:
 
 
-        st.info(
-            f"Módulo cliente: {seleccion}"
-        )
-            # ==========================================
+        if seleccion == "👤 Mi Perfil":
+
+            mostrar_perfil()
+
+
+
+        elif seleccion == "📏 Mis Medidas":
+
+            mostrar_evolucion()
+
+
+
+        elif seleccion == "📈 Mi Evolución":
+
+            mostrar_evolucion()
+
+
+
+        elif seleccion == "🏋️ Mi Plan Personalizado":
+
+            mostrar_personalizado()
+
+
+
+        else:
+
+            st.info(
+                f"Módulo cliente: {seleccion}"
+            )
+
+
+
+# ==========================================
 # EJECUCIÓN PRINCIPAL
 # ==========================================
+
 
 if not st.session_state["autenticado"]:
 
@@ -219,4 +230,5 @@ if not st.session_state["autenticado"]:
 
 else:
 
+    panel_principal()
     panel_principal()
