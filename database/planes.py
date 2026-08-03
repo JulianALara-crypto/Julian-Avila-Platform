@@ -62,8 +62,6 @@ def cargar_planes():
 
 
 
-        # Tomar solamente las 7 columnas necesarias
-
         filas = [
 
             fila[:7]
@@ -187,7 +185,62 @@ def crear_plan(
 
 
 
-        # Actualizar datos después de guardar
+        cargar_planes.clear()
+
+
+
+        return resultado
+
+
+
+    except Exception as e:
+
+
+        return {
+
+            "error": str(e)
+
+        }
+
+
+
+
+# ==========================================
+# RENOVAR PLAN
+# ==========================================
+
+def renovar_plan(
+    cedula,
+    fecha_fin
+):
+
+
+    try:
+
+
+        respuesta = requests.post(
+
+            URL_GYM,
+
+            json={
+
+                "action": "renovar_plan",
+
+                "cedula": str(cedula),
+
+                "fecha_fin": fecha_fin
+
+            }
+
+        )
+
+
+
+        resultado = respuesta.json()
+
+
+
+        # Limpiar cache para traer nueva fecha
 
         cargar_planes.clear()
 
