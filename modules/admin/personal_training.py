@@ -2,7 +2,11 @@ import streamlit as st
 from datetime import datetime, timedelta
 
 from database.gimnasio import cargar_clientes_gym
-from database.planes import cargar_planes, crear_plan
+from database.planes import (
+    cargar_planes,
+    crear_plan,
+    renovar_plan
+)
 from database.resumen_cliente import resumen_cliente
 
 
