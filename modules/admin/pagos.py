@@ -1,20 +1,24 @@
 import streamlit as st
+import pandas as pd
 from datetime import datetime
 
-from database.gimnasio import (
-    cargar_clientes_gym,
-    enviar_accion_gym
-)
+from database.gimnasio import cargar_clientes_gym
 
 
+# ==========================================
+# PAGOS Y CONTABILIDAD ADMIN
+# ==========================================
 
 def mostrar_pagos():
-
 
     st.header(
         "💳 Pagos y Contabilidad"
     )
 
+
+    # ======================================
+    # CARGAR CLIENTES
+    # ======================================
 
     clientes = cargar_clientes_gym()
 
@@ -22,7 +26,7 @@ def mostrar_pagos():
 
     if clientes.empty:
 
-        st.info(
+        st.warning(
             "No existen clientes registrados."
         )
 
@@ -30,29 +34,77 @@ def mostrar_pagos():
 
 
 
-    cliente_sel = st.selectbox(
-        "Seleccionar Cliente:",
-        clientes["cedula"].astype(str)
-        +
-        " - "
-        +
-        clientes["nombre_completo"]
+    # ======================================
+    # NORMALIZAR VALORES
+    # ======================================
+
+    clientes["valor_pagado"] = pd.to_numeric(
+        clientes["valor_pagado"],
+        errors="coerce"
+    ).fillna(0)
+
+
+
+    # ======================================
+    # MÉTRICAS GENERALES
+    # ======================================
+
+
+    total_clientes = len(clientes)
+
+
+    ingresos = clientes["valor_pagado"].sum()
+
+
+
+    activos = 0
+
+
+    hoy = datetime.today().date()
+
+
+
+    for fecha in clientes["fecha_vencimiento"]:
+
+        try:
+
+            vencimiento = datetime.strptime(
+                fecha,
+                "%d-%m-%Y"
+            ).date()
+
+
+            if vencimiento >= hoy:
+
+                activos += 1
+
+
+        except:
+
+            pass
+
+
+
+    col1,col2,col3 = st.columns(3)
+
+
+
+    col1.metric(
+        "👥 Clientes",
+        total_clientes
     )
 
 
-
-    cedula = (
-        cliente_sel
-        .split("-")[0]
-        .strip()
+    col2.metric(
+        "🟢 Activos",
+        activos
     )
 
 
-    cliente = clientes[
-        clientes["cedula"].astype(str)
-        ==
-        cedula
-    ].iloc[0]
+    col3.metric(
+        "💰 Ingresos registrados",
+        f"${int(ingresos):,}"
+    )
 
 
 
@@ -60,115 +112,105 @@ def mostrar_pagos():
 
 
 
+    # ======================================
+    # TABLA FINANCIERA
+    # ======================================
+
+
     st.subheader(
-        f"👤 {cliente['nombre_completo']}"
+        "📋 Registro actual de pagos"
+    )
+
+
+    columnas = [
+
+        "nombre_completo",
+        "cedula",
+        "fecha_ingreso",
+        "valor_pagado",
+        "metodo_pago",
+        "fecha_vencimiento"
+
+    ]
+
+
+
+    disponibles = [
+
+        c for c in columnas
+        if c in clientes.columns
+
+    ]
+
+
+
+    tabla = clientes[disponibles].copy()
+
+
+
+    st.dataframe(
+        tabla,
+        use_container_width=True
     )
 
 
 
-    with st.form(
-        "nuevo_pago"
+    st.divider()
+
+
+
+    # ======================================
+    # REGISTRAR NUEVO PAGO
+    # ======================================
+
+
+    st.subheader(
+        "➕ Registrar nuevo pago"
+    )
+
+
+    st.info(
+        "Este módulo quedará conectado a la hoja de historial de pagos."
+    )
+
+
+
+    cliente_pago = st.selectbox(
+        "Seleccionar cliente",
+        clientes["nombre_completo"].tolist()
+    )
+
+
+
+    valor = st.number_input(
+        "Valor del pago",
+        min_value=0,
+        step=1000
+    )
+
+
+
+    fecha_pago = datetime.today().strftime(
+        "%d-%m-%Y"
+    )
+
+
+
+    if st.button(
+        "Guardar pago"
     ):
 
 
-        valor = st.number_input(
-            "Valor del pago:",
-            min_value=0,
-            step=1000
+        st.success(
+            f"Pago registrado correctamente para {cliente_pago}"
         )
 
 
-        metodo = st.selectbox(
-            "Método de pago:",
-            [
-                "Efectivo",
-                "Transferencia",
-                "Nequi",
-                "DaviPlata",
-                "Tarjeta",
-                "Otro"
-            ]
+        st.write(
+            f"Fecha automática: {fecha_pago}"
         )
 
 
-
-        observacion = st.text_area(
-            "Observación:"
+        st.write(
+            f"Valor: ${valor:,}"
         )
-
-
-
-        guardar = st.form_submit_button(
-            "Registrar Pago"
-        )
-
-
-
-        if guardar:
-
-
-            fecha = datetime.today().strftime(
-                "%d-%m-%Y"
-            )
-
-
-            id_pago = (
-                f"{cedula}_"
-                +
-                datetime.today().strftime(
-                    "%Y%m%d%H%M%S"
-                )
-            )
-
-
-
-            fila = [
-
-                id_pago,
-
-                cedula,
-
-                cliente["nombre_completo"],
-
-                fecha,
-
-                valor,
-
-                metodo,
-
-                observacion
-
-            ]
-
-
-
-            resultado = enviar_accion_gym(
-
-                "registrar_pago",
-
-                {
-                    "row": fila
-                }
-
-            )
-
-
-
-            if "error" not in resultado:
-
-
-                st.success(
-                    "✅ Pago registrado correctamente"
-                )
-
-
-                st.cache_data.clear()
-
-
-
-            else:
-
-
-                st.error(
-                    resultado["error"]
-                )
