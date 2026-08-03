@@ -57,10 +57,6 @@ def mostrar_personal_training():
 
 
 
-    # ======================================
-    # BUSCAR CLIENTE
-    # ======================================
-
     cedula = st.text_input(
         "Buscar cliente por cédula"
     )
@@ -121,9 +117,8 @@ def mostrar_personal_training():
 
 
     # ======================================
-    # RESUMEN FÍSICO DEL CLIENTE
+    # RESUMEN FÍSICO
     # ======================================
-
 
     resumen = resumen_cliente(
         cedula
@@ -155,104 +150,73 @@ def mostrar_personal_training():
 
         try:
 
-            cambio_peso = (
+            peso = float(actual.get("peso_kg",0))
 
-                float(actual.get("peso_kg",0))
-
-                -
-
-                float(inicial.get("peso_kg",0))
-
-            )
+            peso_ini = float(inicial.get("peso_kg",0))
 
         except:
 
-            cambio_peso = 0
+            peso = 0
+
+            peso_ini = 0
 
 
 
         try:
 
-            cambio_grasa = (
+            grasa = float(actual.get("porcentaje_grasa",0))
 
-                float(actual.get("porcentaje_grasa",0))
-
-                -
-
-                float(inicial.get("porcentaje_grasa",0))
-
-            )
+            grasa_ini = float(inicial.get("porcentaje_grasa",0))
 
         except:
 
-            cambio_grasa = 0
+            grasa = 0
+
+            grasa_ini = 0
 
 
 
         try:
 
-            cambio_cintura = (
+            cintura = float(actual.get("cintura_cm",0))
 
-                float(actual.get("cintura_cm",0))
-
-                -
-
-                float(inicial.get("cintura_cm",0))
-
-            )
+            cintura_ini = float(inicial.get("cintura_cm",0))
 
         except:
 
-            cambio_cintura = 0
+            cintura = 0
 
+            cintura_ini = 0
 
 
 
         col1.metric(
-
             "⚖️ Peso",
-
-            f"{actual.get('peso_kg','')} kg",
-
-            f"{cambio_peso:.1f}"
-
+            f"{peso} kg",
+            f"{peso-peso_ini:.1f}"
         )
-
 
 
         col2.metric(
-
             "🔥 % Grasa",
-
-            f"{actual.get('porcentaje_grasa','')} %",
-
-            f"{cambio_grasa:.1f}"
-
+            f"{grasa} %",
+            f"{grasa-grasa_ini:.1f}"
         )
-
 
 
         col3.metric(
-
             "📏 Cintura",
-
-            f"{actual.get('cintura_cm','')} cm",
-
-            f"{cambio_cintura:.1f}"
-
+            f"{cintura} cm",
+            f"{cintura-cintura_ini:.1f}"
         )
 
 
-
         col4.metric(
-
             "📊 IMC",
-
             actual.get(
                 "imc",
                 ""
             )
-
         )
 
 
@@ -261,9 +225,7 @@ def mostrar_personal_training():
 
 
         st.info(
-
             "Este cliente todavía no tiene evaluaciones físicas."
-
         )
 
 
@@ -293,7 +255,6 @@ def mostrar_personal_training():
         ]
 
 
-
         if not encontrado.empty:
 
             plan_actual = encontrado.iloc[0]
@@ -314,15 +275,11 @@ def mostrar_personal_training():
     if plan_actual is not None:
 
 
-
         st.success(
 
             plan_actual.get(
-
                 "tipo_plan",
-
                 "Sin nombre"
-
             )
 
         )
@@ -338,7 +295,6 @@ def mostrar_personal_training():
             f"📅 Inicio: {plan_actual.get('fecha_inicio','')}"
 
         )
-
 
 
         col2.write(
@@ -373,8 +329,102 @@ def mostrar_personal_training():
 
 
 
-    else:
+        # ======================================
+        # RENOVAR PLAN
+        # ======================================
 
+
+        st.divider()
+
+
+        st.subheader(
+            "🔄 Renovar plan"
+        )
+
+
+
+        dias_renovacion = st.number_input(
+
+            "Duración nueva (días)",
+
+            min_value=1,
+
+            value=30,
+
+            key="dias_renovacion"
+
+        )
+
+
+
+        if st.button(
+
+            "🔄 Renovar Plan",
+
+            use_container_width=True
+
+        ):
+
+
+
+            nueva_fecha = (
+
+                datetime.today()
+
+                +
+
+                timedelta(
+
+                    days=int(dias_renovacion)
+
+                )
+
+            )
+
+
+
+            resultado = renovar_plan(
+
+                cedula,
+
+                nueva_fecha.strftime(
+
+                    "%d-%m-%Y"
+
+                )
+
+            )
+
+
+
+            if isinstance(resultado, dict) and resultado.get("status") == "success":
+
+
+                st.success(
+
+                    "✅ Plan renovado correctamente."
+
+                )
+
+
+                cargar_planes.clear()
+
+                st.rerun()
+
+
+
+            else:
+
+
+                st.error(
+
+                    f"❌ Error renovando plan: {resultado}"
+
+                )
+
+
+
+    else:
 
 
         st.info(
@@ -482,9 +532,7 @@ def mostrar_personal_training():
             "fecha_inicio":
 
                 fecha_inicio.strftime(
-
                     "%d-%m-%Y"
-
                 ),
 
 
@@ -492,9 +540,7 @@ def mostrar_personal_training():
             "fecha_fin":
 
                 fecha_fin.strftime(
-
                     "%d-%m-%Y"
-
                 ),
 
 
