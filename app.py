@@ -1,6 +1,7 @@
 import streamlit as st
 
 from config.config import APP_NAME
+from auth.login import mostrar_login
 
 
 # ==========================================
@@ -33,7 +34,7 @@ st.markdown(
     }
 
 
-    p,label {
+    p,label,.stMarkdown {
         color:#dddddd !important;
     }
 
@@ -50,36 +51,90 @@ st.markdown(
 )
 
 
+
 # ==========================================
-# INICIO
+# INICIALIZAR SESIÓN
 # ==========================================
 
-def main():
+if "autenticado" not in st.session_state:
+
+    st.session_state["autenticado"] = False
+
+
+
+# ==========================================
+# PANEL PRINCIPAL
+# ==========================================
+
+def panel_principal():
+
+    usuario = st.session_state["usuario"]
+
+
+    st.sidebar.title(
+        "Julian Avila Platform"
+    )
+
+
+    st.sidebar.write(
+        f"👤 {usuario['nombre']}"
+    )
+
+
+    st.sidebar.write(
+        f"Rol: {usuario['rol']}"
+    )
+
+
+    if st.sidebar.button(
+        "Cerrar Sesión"
+    ):
+
+        st.session_state.clear()
+
+        st.rerun()
+
+
 
     st.title(
         "JULIAN AVILA PLATFORM"
     )
 
 
-    st.markdown(
-        """
-        ### Plataforma integral
+    if usuario["rol"] == "Admin":
 
-        Personal Training
+        st.success(
+            "Panel Administrador"
+        )
 
-        Evolution Tracker
-
-        Gestión Gimnasio
-
-        """
-    )
+        st.write(
+            "Aquí estará el control total del sistema."
+        )
 
 
-    st.info(
-        "Sistema en construcción - Fase inicial"
-    )
+    else:
+
+        st.success(
+            "Perfil Cliente"
+        )
+
+        st.write(
+            "Aquí aparecerá tu evolución, medidas y planes."
+        )
 
 
 
+# ==========================================
+# EJECUCIÓN
+# ==========================================
+
+if not st.session_state["autenticado"]:
+
+    mostrar_login()
+
+
+else:
+
+    panel_principal()
 if __name__ == "__main__":
     main()
