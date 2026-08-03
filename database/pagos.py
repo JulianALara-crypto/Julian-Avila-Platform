@@ -16,27 +16,74 @@ def cargar_pagos():
 
     try:
 
-        # Enviamos petición especial al Apps Script
+        url = URL_GYM + "?action=pagos"
+
+
         respuesta = requests.get(
-            URL_GYM
+            url
         )
 
 
         datos = respuesta.json()
 
 
-        # Si no hay datos
-        if not datos:
 
-            return pd.DataFrame()
+        if len(datos) <= 1:
+
+            return pd.DataFrame(
+                columns=[
+                    "cedula",
+                    "nombre_completo",
+                    "fecha_pago",
+                    "valor",
+                    "concepto"
+                ]
+            )
 
 
 
-        # La hoja Pagos todavía no se lee
-        # desde doGet, lo agregaremos después
+        columnas = [
+            "cedula",
+            "nombre_completo",
+            "fecha_pago",
+            "valor",
+            "concepto"
+        ]
 
 
-        return pd.DataFrame()
+
+        df = pd.DataFrame(
+            datos[1:],
+            columns=columnas
+        )
+
+
+
+        if "valor" in df.columns:
+
+            df["valor"] = pd.to_numeric(
+                df["valor"],
+                errors="coerce"
+            ).fillna(0)
+
+
+
+        if "fecha_pago" in df.columns:
+
+            fechas = pd.to_datetime(
+                df["fecha_pago"],
+                errors="coerce",
+                dayfirst=True
+            )
+
+
+            df["fecha_pago"] = fechas.dt.strftime(
+                "%d-%m-%Y"
+            )
+
+
+
+        return df
 
 
 
@@ -53,7 +100,7 @@ def cargar_pagos():
 
 
 # ==========================================
-# REGISTRAR NUEVO PAGO
+# REGISTRAR PAGO
 # ==========================================
 
 def registrar_pago(
@@ -63,9 +110,7 @@ def registrar_pago(
     concepto
 ):
 
-
     try:
-
 
         fecha_pago = datetime.today().strftime(
             "%d-%m-%Y"
@@ -93,7 +138,6 @@ def registrar_pago(
             }
 
         )
-
 
 
         return respuesta.json()
