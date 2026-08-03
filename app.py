@@ -173,30 +173,41 @@ def panel_principal():
 
     if usuario["rol"] == "Admin":
 
+    if seleccion == "📊 Dashboard":
 
-        if seleccion == "📊 Dashboard":
+        mostrar_dashboard()
 
-            mostrar_dashboard()
+    elif seleccion == "👥 Clientes":
 
+        mostrar_clientes()
 
+    elif seleccion == "💳 Pagos y Contabilidad":
 
-        elif seleccion == "👥 Clientes":
+        mostrar_pagos()
 
-            mostrar_clientes()
+    elif seleccion == "🚨 Alertas de Vencimiento":
 
+        mostrar_alertas()
 
+    elif seleccion == "🏋️ Personal Training":
 
-        elif seleccion == "💳 Pagos y Contabilidad":
+        st.info("Módulo en construcción.")
 
-            mostrar_pagos()
+    elif seleccion == "📈 Evolución Física":
 
+        st.info("Módulo en construcción.")
 
+    elif seleccion == "📄 Documentos":
 
-        else:
+        st.info("Módulo en construcción.")
 
-            st.info(
-                f"Módulo administrador: {seleccion}"
-            )
+    elif seleccion == "⚙️ Configuración":
+
+        st.info("Módulo en construcción.")
+
+    else:
+
+        st.warning("Opción no disponible.")
 
 
 
@@ -206,36 +217,29 @@ def panel_principal():
 
     else:
 
+    if seleccion == "👤 Mi Perfil":
 
-        if seleccion == "👤 Mi Perfil":
+        mostrar_perfil()
 
-            mostrar_perfil()
+    elif seleccion == "📏 Mis Medidas":
 
+        mostrar_evolucion()
 
+    elif seleccion == "📈 Mi Evolución":
 
-        elif seleccion == "📏 Mis Medidas":
+        mostrar_evolucion()
 
-            mostrar_evolucion()
+    elif seleccion == "🏋️ Mi Plan Personalizado":
 
+        mostrar_personalizado()
 
+    elif seleccion == "📄 Documentos":
 
-        elif seleccion == "📈 Mi Evolución":
+        st.info("Próximamente podrás consultar aquí tus documentos.")
 
-            mostrar_evolucion()
+    else:
 
-
-
-        elif seleccion == "🏋️ Mi Plan Personalizado":
-
-            mostrar_personalizado()
-
-
-
-        else:
-
-            st.info(
-                f"Módulo cliente: {seleccion}"
-            )
+        st.warning("Opción no disponible.")
 
 
 
