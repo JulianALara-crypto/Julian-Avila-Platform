@@ -60,7 +60,6 @@ st.markdown(
 # ==========================================
 
 if "autenticado" not in st.session_state:
-
     st.session_state["autenticado"] = False
 
 
@@ -74,7 +73,21 @@ def panel_principal():
     from auth.permissions import obtener_menu
 
 
-    usuario = st.session_state["usuario"]
+    usuario = st.session_state.get(
+        "usuario",
+        None
+    )
+
+
+    if usuario is None:
+
+        st.error(
+            "No existe información del usuario autenticado."
+        )
+
+        st.session_state.clear()
+
+        st.rerun()
 
 
 
@@ -105,22 +118,29 @@ def panel_principal():
     # MENÚ SEGÚN ROL
     # ==================================
 
-    opciones = obtener_menu(
-        usuario["rol"]
+    opciones = list(
+        dict.fromkeys(
+            obtener_menu(
+                usuario["rol"]
+            )
+        )
     )
 
 
-   seleccion = st.sidebar.radio(
-    "MENÚ",
-    opciones,
-    key="menu_principal"
-)
-
+    seleccion = st.sidebar.radio(
+        "MENÚ",
+        opciones,
+        key=f"menu_{usuario['rol']}"
+    )
 
 
     st.sidebar.divider()
 
 
+
+    # ==================================
+    # CERRAR SESIÓN
+    # ==================================
 
     if st.sidebar.button(
         "Cerrar Sesión"
@@ -133,7 +153,7 @@ def panel_principal():
 
 
     # ==================================
-    # CONTENIDO
+    # CONTENIDO PRINCIPAL
     # ==================================
 
     st.title(
@@ -226,6 +246,7 @@ def panel_principal():
 if not st.session_state["autenticado"]:
 
     mostrar_login()
+
 
 else:
 
