@@ -151,7 +151,7 @@ def mostrar_evolucion():
 
 
         c3.metric(
-            Cintura",
+            "Cintura",
             f"{cintura_a} cm",
             f"{cintura_a-cintura_i:.1f}"
         )
