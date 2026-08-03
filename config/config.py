@@ -16,16 +16,18 @@ APP_VERSION = "1.0.0"
 # Usuarios + medidas + evolución
 
 URL_USUARIOS = (
-    "PEGA_AQUI_LA_URL_DEL_SCRIPT_1"
+    "https://script.google.com/macros/s/AKfycbzE2qSC4oR8zDa1pTyTjQfKFxsTHepWC3iW9JriiQ75laCFCQbs7iaceuH9sVP-XuDo/exec"
 )
+
 
 
 # Script 2:
 # Gestión gimnasio
 
 URL_GYM = (
-    "PEGA_AQUI_LA_URL_DEL_SCRIPT_2"
+    "https://script.google.com/macros/s/AKfycbwkP0xrnFx2rhHI9M5DEsW47v_2GSIS9uxMJ-K3wAHEIryIyhEG_eGHKKIf2Im0SppL/exec"
 )
+
 
 
 # ==========================================
@@ -35,6 +37,7 @@ URL_GYM = (
 DIAS_PERSONALIZADO = 30
 
 
+
 # ==========================================
 # ADMINISTRADOR PRINCIPAL
 # ==========================================
@@ -42,6 +45,7 @@ DIAS_PERSONALIZADO = 30
 ADMIN_USER = "admin"
 
 ADMIN_PASSWORD = "admin123456"
+
 
 
 # ==========================================
