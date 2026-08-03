@@ -10,7 +10,7 @@ from config.config import (
 
 
 # ==========================================
-# CARGAR USUARIOS
+# CONSULTAR USUARIOS GOOGLE SHEETS
 # ==========================================
 
 @st.cache_data(ttl=300)
@@ -18,21 +18,16 @@ def obtener_usuarios():
 
     try:
 
-        respuesta = requests.get(
-            URL_USUARIOS
-        )
+        respuesta = requests.get(URL_USUARIOS)
 
         datos = respuesta.json()
-
 
         usuarios = datos.get(
             "usuarios",
             []
         )
 
-
         if len(usuarios) <= 1:
-
             return pd.DataFrame()
 
 
@@ -65,26 +60,30 @@ def obtener_usuarios():
         return df
 
 
-    except Exception:
+    except Exception as error:
+
+        st.error(
+            f"Error cargando usuarios: {error}"
+        )
 
         return pd.DataFrame()
 
 
 
 # ==========================================
-# CREAR SESIÓN
+# GUARDAR SESIÓN
 # ==========================================
 
-def iniciar_sesion_usuario(usuario):
+def crear_sesion(usuario):
 
-    st.session_state.autenticado = True
+    st.session_state["autenticado"] = True
 
-    st.session_state.usuario = usuario
+    st.session_state["usuario"] = usuario
 
 
 
 # ==========================================
-# LOGIN
+# MOSTRAR LOGIN
 # ==========================================
 
 def mostrar_login():
@@ -95,15 +94,15 @@ def mostrar_login():
     )
 
 
-    columna1, columna2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
 
 
-    # ================================
-    # INGRESO
-    # ================================
+    # ======================================
+    # LOGIN
+    # ======================================
 
-    with columna1:
+    with col1:
 
 
         st.subheader(
@@ -122,16 +121,15 @@ def mostrar_login():
         )
 
 
-
         if st.button(
             "Ingresar",
             use_container_width=True
         ):
 
 
-            # ------------------------
+            # --------------------------
             # ADMIN
-            # ------------------------
+            # --------------------------
 
             if (
                 cedula == ADMIN_USER
@@ -140,7 +138,7 @@ def mostrar_login():
             ):
 
 
-                iniciar_sesion_usuario(
+                crear_sesion(
                     {
                         "cedula": "ADMIN",
                         "nombre": "JULIAN AVILA",
@@ -148,16 +146,16 @@ def mostrar_login():
                     }
                 )
 
-
                 st.rerun()
 
 
 
-            # ------------------------
-            # CLIENTES
-            # ------------------------
+            # --------------------------
+            # CLIENTE
+            # --------------------------
 
             else:
+
 
                 df = obtener_usuarios()
 
@@ -165,7 +163,7 @@ def mostrar_login():
                 if df.empty:
 
                     st.error(
-                        "No fue posible consultar usuarios"
+                        "No hay usuarios disponibles"
                     )
 
 
@@ -196,7 +194,7 @@ def mostrar_login():
                         ):
 
 
-                            iniciar_sesion_usuario(
+                            crear_sesion(
                                 {
                                     "cedula": str(datos["cedula"]),
                                     "nombre": datos["nombre_completo"],
@@ -219,21 +217,21 @@ def mostrar_login():
 
 
 
-    # ================================
+    # ======================================
     # REGISTRO
-    # ================================
+    # ======================================
 
-    with columna2:
+    with col2:
 
 
         st.subheader(
-            "Crear cuenta"
+            "Crear cuenta nueva"
         )
 
 
         st.info(
             """
-            El registro de nuevos clientes
-            será integrado en la siguiente etapa.
+            El registro de clientes
+            será conectado en la siguiente fase.
             """
         )
