@@ -18,12 +18,22 @@ def cargar_planes():
         respuesta = requests.get(
             URL_GYM,
             params={
-                "action":"planes"
+                "action": "planes"
             }
         )
 
 
+        texto = respuesta.text.strip()
+
+
+        if not texto:
+
+            return pd.DataFrame()
+
+
+
         datos = respuesta.json()
+
 
 
         if len(datos) <= 1:
@@ -35,20 +45,41 @@ def cargar_planes():
         columnas = [
 
             "cedula",
+
             "nombre_completo",
+
             "tipo_plan",
+
             "fecha_inicio",
+
             "fecha_fin",
+
             "estado",
+
             "observaciones"
 
         ]
 
 
 
+        # Tomar solamente las 7 columnas necesarias
+
+        filas = [
+
+            fila[:7]
+
+            for fila in datos[1:]
+
+        ]
+
+
+
         df = pd.DataFrame(
-            datos[1:],
+
+            filas,
+
             columns=columnas
+
         )
 
 
@@ -56,7 +87,15 @@ def cargar_planes():
         df["cedula"] = (
 
             df["cedula"]
+
             .astype(str)
+
+            .str.replace(
+                ".0",
+                "",
+                regex=False
+            )
+
             .str.strip()
 
         )
@@ -71,11 +110,14 @@ def cargar_planes():
 
 
         st.error(
+
             f"Error cargando planes: {e}"
+
         )
 
 
         return pd.DataFrame()
+
 
 
 
@@ -102,10 +144,13 @@ def buscar_plan_cliente(
     return df[
 
         df["cedula"]
+
         ==
+
         str(cedula)
 
     ]
+
 
 
 
@@ -128,7 +173,7 @@ def crear_plan(
 
             json={
 
-                "action":"crear_plan",
+                "action": "crear_plan",
 
                 **datos
 
@@ -138,7 +183,17 @@ def crear_plan(
 
 
 
-        return respuesta.json()
+        resultado = respuesta.json()
+
+
+
+        # Actualizar datos después de guardar
+
+        cargar_planes.clear()
+
+
+
+        return resultado
 
 
 
@@ -147,6 +202,6 @@ def crear_plan(
 
         return {
 
-            "error":str(e)
+            "error": str(e)
 
         }
