@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 
 from database.medidas import obtener_medidas_cliente
-from database.usuarios import cargar_usuarios
 
 
 
@@ -12,25 +11,9 @@ from database.usuarios import cargar_usuarios
 
 def mostrar_evolucion_admin():
 
-
     st.header(
         "📈 Evolución Física Clientes"
     )
-
-
-    usuarios = cargar_usuarios()
-
-
-
-    if usuarios.empty:
-
-
-        st.warning(
-            "No existen usuarios registrados."
-        )
-
-        return
-
 
 
     cedula = st.text_input(
@@ -41,53 +24,11 @@ def mostrar_evolucion_admin():
 
     if not cedula:
 
-
         st.info(
-            "Ingrese una cédula para consultar."
+            "Ingrese una cédula para consultar evolución."
         )
 
         return
-
-
-
-
-    cliente = usuarios[
-
-        usuarios["cedula"].astype(str)
-        ==
-        str(cedula)
-
-    ]
-
-
-
-    if cliente.empty:
-
-
-        st.warning(
-            "Cliente no encontrado."
-        )
-
-        return
-
-
-
-    datos_cliente = cliente.iloc[0]
-
-
-
-    st.subheader(
-        "👤 Cliente"
-    )
-
-
-    st.write(
-        datos_cliente["nombre_completo"]
-    )
-
-
-
-    st.divider()
 
 
 
@@ -99,150 +40,23 @@ def mostrar_evolucion_admin():
 
     if registros.empty:
 
-
-        st.info(
-            "Este cliente no tiene evaluaciones registradas."
+        st.warning(
+            "No existen evaluaciones para este cliente."
         )
 
         return
 
 
 
-
-    # ======================================
-    # ORDENAR FECHAS
-    # ======================================
-
-
-    if "fecha_evaluacion" in registros.columns:
-
-
-        registros["_fecha"] = pd.to_datetime(
-
-            registros["fecha_evaluacion"],
-
-            errors="coerce",
-
-            dayfirst=True
-
-        )
-
-
-        registros = (
-
-            registros
-
-            .sort_values("_fecha")
-
-            .drop(
-                columns=["_fecha"]
-            )
-
-        )
-
-
-
-
     st.subheader(
-        "📊 Resumen progreso"
+        "📋 Historial de evaluaciones"
     )
 
 
-
-    if len(registros) >= 2:
-
-
-        inicial = registros.iloc[0]
-
-        actual = registros.iloc[-1]
-
-
-
-        def numero(fila,columna):
-
-            try:
-
-                return float(
-                    fila[columna]
-                )
-
-            except:
-
-                return 0
-
-
-
-        peso_i = numero(
-            inicial,
-            "peso_kg"
-        )
-
-        peso_a = numero(
-            actual,
-            "peso_kg"
-        )
-
-
-        grasa_i = numero(
-            inicial,
-            "porcentaje_grasa"
-        )
-
-        grasa_a = numero(
-            actual,
-            "porcentaje_grasa"
-        )
-
-
-        cintura_i = numero(
-            inicial,
-            "cintura_cm"
-        )
-
-        cintura_a = numero(
-            actual,
-            "cintura_cm"
-        )
-
-
-
-        c1,c2,c3 = st.columns(3)
-
-
-
-        c1.metric(
-
-            "Peso",
-
-            f"{peso_a} kg",
-
-            f"{peso_a-peso_i:.1f}"
-
-        )
-
-
-
-        c2.metric(
-
-            "% Grasa",
-
-            f"{grasa_a}%",
-
-            f"{grasa_a-grasa_i:.1f}"
-
-        )
-
-
-
-        c3.metric(
-
-            "Cintura",
-
-            f"{cintura_a} cm",
-
-            f"{cintura_a-cintura_i:.1f}"
-
-        )
+    st.dataframe(
+        registros.astype(str),
+        use_container_width=True
+    )
 
 
 
@@ -250,27 +64,14 @@ def mostrar_evolucion_admin():
 
 
 
-    # ======================================
-    # GRÁFICA
-    # ======================================
+    # ===============================
+    # GRÁFICAS
+    # ===============================
 
 
     st.subheader(
-        "📈 Tendencia"
+        "📊 Progreso del cliente"
     )
-
-
-
-    datos = registros.copy()
-
-
-
-    if "fecha_evaluacion" in datos.columns:
-
-
-        datos = datos.set_index(
-            "fecha_evaluacion"
-        )
 
 
 
@@ -294,7 +95,7 @@ def mostrar_evolucion_admin():
 
         c for c in columnas
 
-        if c in datos.columns
+        if c in registros.columns
 
     ]
 
@@ -303,7 +104,11 @@ def mostrar_evolucion_admin():
     if disponibles:
 
 
-        grafica = datos[disponibles].apply(
+        grafica = registros[
+
+            disponibles
+
+        ].apply(
 
             pd.to_numeric,
 
@@ -317,21 +122,8 @@ def mostrar_evolucion_admin():
         )
 
 
+    else:
 
-    st.divider()
-
-
-
-    st.subheader(
-        "📋 Historial completo"
-    )
-
-
-
-    st.dataframe(
-
-        registros.astype(str),
-
-        use_container_width=True
-
-    )
+        st.info(
+            "No hay datos suficientes para generar gráfica."
+        )
