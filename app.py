@@ -110,10 +110,11 @@ def panel_principal():
     )
 
 
-    seleccion = st.sidebar.radio(
-        "MENÚ",
-        opciones
-    )
+   seleccion = st.sidebar.radio(
+    "MENÚ",
+    opciones,
+    key="menu_principal"
+)
 
 
 
@@ -222,13 +223,10 @@ def panel_principal():
 # EJECUCIÓN PRINCIPAL
 # ==========================================
 
-
 if not st.session_state["autenticado"]:
 
     mostrar_login()
 
-
 else:
 
-    panel_principal()
     panel_principal()
