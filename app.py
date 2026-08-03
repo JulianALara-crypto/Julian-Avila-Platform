@@ -68,8 +68,15 @@ if "autenticado" not in st.session_state:
 
 def panel_principal():
 
+    from auth.permissions import obtener_menu
+
+
     usuario = st.session_state["usuario"]
 
+
+    # ==================================
+    # SIDEBAR USUARIO
+    # ==================================
 
     st.sidebar.title(
         "Julian Avila Platform"
@@ -86,6 +93,28 @@ def panel_principal():
     )
 
 
+    st.sidebar.divider()
+
+
+
+    # ==================================
+    # MENÚ SEGÚN ROL
+    # ==================================
+
+    opciones = obtener_menu(
+        usuario["rol"]
+    )
+
+
+    seleccion = st.sidebar.radio(
+        "MENÚ",
+        opciones
+    )
+
+
+    st.sidebar.divider()
+
+
     if st.sidebar.button(
         "Cerrar Sesión"
     ):
@@ -96,45 +125,78 @@ def panel_principal():
 
 
 
+    # ==================================
+    # CONTENIDO TEMPORAL
+    # ==================================
+
     st.title(
         "JULIAN AVILA PLATFORM"
     )
 
 
+    st.subheader(
+        seleccion
+    )
+
+
     if usuario["rol"] == "Admin":
 
-        st.success(
-            "Panel Administrador"
-        )
 
-        st.write(
-            "Aquí estará el control total del sistema."
-        )
+        if seleccion == "📊 Dashboard":
+
+            st.info(
+                "Aquí estará el resumen financiero y estadísticas."
+            )
+
+
+        elif seleccion == "👥 Clientes":
+
+            st.info(
+                "Aquí estará la gestión completa de clientes."
+            )
+
+
+        elif seleccion == "💳 Pagos y Contabilidad":
+
+            st.info(
+                "Aquí estarán pagos parciales, ingresos y contabilidad."
+            )
+
+
+        else:
+
+            st.info(
+                f"Módulo administrador: {seleccion}"
+            )
+
 
 
     else:
 
-        st.success(
-            "Perfil Cliente"
-        )
 
-        st.write(
-            "Aquí aparecerá tu evolución, medidas y planes."
-        )
+        if seleccion == "👤 Mi Perfil":
 
+            st.info(
+                "Aquí estará la información personal del cliente."
+            )
 
 
-# ==========================================
-# EJECUCIÓN
-# ==========================================
+        elif seleccion == "📏 Mis Medidas":
 
-if not st.session_state["autenticado"]:
-
-    mostrar_login()
+            st.info(
+                "Aquí estarán las evaluaciones antropométricas."
+            )
 
 
-else:
+        elif seleccion == "📈 Mi Evolución":
 
-    panel_principal()
-if __name__ == "__main__":
-    main()
+            st.info(
+                "Aquí estarán las gráficas de progreso."
+            )
+
+
+        else:
+
+            st.info(
+                f"Módulo cliente: {seleccion}"
+            )
