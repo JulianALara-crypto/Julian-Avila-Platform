@@ -6,20 +6,18 @@ from database.gimnasio import cargar_clientes_gym
 from database.pagos import registrar_pago
 
 
+
 # ==========================================
 # PAGOS Y CONTABILIDAD ADMIN
 # ==========================================
 
 def mostrar_pagos():
 
+
     st.header(
         "💳 Pagos y Contabilidad"
     )
 
-
-    # ======================================
-    # CARGAR CLIENTES
-    # ======================================
 
     clientes = cargar_clientes_gym()
 
@@ -36,7 +34,7 @@ def mostrar_pagos():
 
 
     # ======================================
-    # NORMALIZAR VALORES
+    # NORMALIZAR DATOS
     # ======================================
 
     clientes["valor_pagado"] = pd.to_numeric(
@@ -44,11 +42,6 @@ def mostrar_pagos():
         errors="coerce"
     ).fillna(0)
 
-
-
-    # ======================================
-    # MÉTRICAS GENERALES
-    # ======================================
 
 
     total_clientes = len(clientes)
@@ -86,8 +79,11 @@ def mostrar_pagos():
 
 
 
-    col1,col2,col3 = st.columns(3)
+    # ======================================
+    # MÉTRICAS
+    # ======================================
 
+    col1, col2, col3 = st.columns(3)
 
 
     col1.metric(
@@ -114,12 +110,11 @@ def mostrar_pagos():
 
 
     # ======================================
-    # TABLA FINANCIERA
+    # TABLA CLIENTES
     # ======================================
 
-
     st.subheader(
-        "📋 Registro actual de pagos"
+        "📋 Pagos actuales"
     )
 
 
@@ -138,20 +133,22 @@ def mostrar_pagos():
 
     disponibles = [
 
-        c for c in columnas
-        if c in clientes.columns
+        columna
+
+        for columna in columnas
+
+        if columna in clientes.columns
 
     ]
 
 
 
-    tabla = clientes[disponibles].copy()
-
-
-
     st.dataframe(
-        tabla,
+
+        clientes[disponibles],
+
         use_container_width=True
+
     )
 
 
@@ -161,82 +158,97 @@ def mostrar_pagos():
 
 
     # ======================================
-    # REGISTRAR NUEVO PAGO
+    # NUEVO PAGO
     # ======================================
-
 
     st.subheader(
         "➕ Registrar nuevo pago"
     )
 
 
-    st.info(
-        "Este módulo quedará conectado a la hoja de historial de pagos."
-    )
-
-
 
     cliente_pago = st.selectbox(
-        "Seleccionar cliente",
+
+        "Cliente",
+
         clientes["nombre_completo"].tolist()
+
     )
 
 
 
     valor = st.number_input(
+
         "Valor del pago",
+
         min_value=0,
+
         step=1000
+
     )
 
 
 
-    fecha_pago = datetime.today().strftime(
-        "%d-%m-%Y"
+    concepto = st.selectbox(
+
+        "Concepto",
+
+        [
+
+            "Pago Personalizado",
+
+            "Abono mensualidad",
+
+            "Otro"
+
+        ]
+
     )
 
 
 
     if st.button(
-    "Guardar pago"
-):
+        "Guardar pago"
+    ):
 
 
-    cliente = clientes[
-        clientes["nombre_completo"] == cliente_pago
-    ].iloc[0]
-
-
-
-    resultado = registrar_pago(
-
-        cliente["cedula"],
-
-        cliente["nombre_completo"],
-
-        valor,
-
-        "Pago Personalizado"
-
-    )
+        cliente = clientes[
+            clientes["nombre_completo"]
+            ==
+            cliente_pago
+        ].iloc[0]
 
 
 
-    if resultado.get("status") == "success":
+        resultado = registrar_pago(
 
+            cliente["cedula"],
 
-        st.success(
-            "✅ Pago guardado correctamente"
+            cliente["nombre_completo"],
+
+            valor,
+
+            concepto
+
         )
 
 
-        st.cache_data.clear()
+
+        if resultado.get("status") == "success":
+
+
+            st.success(
+                "✅ Pago guardado correctamente"
+            )
+
+
+            st.cache_data.clear()
 
 
 
-    else:
+        else:
 
 
-        st.error(
-            resultado
-        )
+            st.error(
+                resultado
+            )
