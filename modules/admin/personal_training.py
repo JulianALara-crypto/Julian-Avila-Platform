@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 
 from database.gimnasio import cargar_clientes_gym
-from database.planes import cargar_planes
+from database.planes import cargar_planes, crear_plan
 
 
 
@@ -55,7 +55,6 @@ def mostrar_personal_training():
     # ======================================
     # BUSCAR CLIENTE
     # ======================================
-
 
     cedula = st.text_input(
         "Buscar cliente por cédula"
@@ -116,10 +115,10 @@ def mostrar_personal_training():
 
 
 
+
     # ======================================
     # PLAN ACTUAL
     # ======================================
-
 
     planes = cargar_planes()
 
@@ -166,7 +165,8 @@ def mostrar_personal_training():
         )
 
 
-        col1,col2 = st.columns(2)
+        col1, col2 = st.columns(2)
+
 
 
         col1.write(
@@ -179,8 +179,9 @@ def mostrar_personal_training():
         )
 
 
+
         st.write(
-            f"Estado: {plan_actual['estado']}"
+            f"Estado: {plan_actual.get('estado','Activo')}"
         )
 
 
@@ -200,7 +201,7 @@ def mostrar_personal_training():
 
 
     # ======================================
-    # CREAR / ACTUALIZAR PLAN
+    # CREAR PLAN
     # ======================================
 
 
@@ -240,43 +241,110 @@ def mostrar_personal_training():
 
 
 
+
     if st.button(
+
         "Guardar Plan",
+
         use_container_width=True
+
     ):
 
 
 
         fecha_inicio = datetime.today()
 
+
+
         fecha_fin = (
+
             fecha_inicio
+
             +
+
             timedelta(days=dias)
+
         )
 
 
 
-        st.info(
-            "Conexión preparada. Siguiente paso: guardar en Google Sheets."
-        )
+
+        nuevo_plan = {
 
 
-        st.write({
+            "cedula":
 
-            "cedula":cedula,
+                str(cedula),
 
-            "nombre":datos["nombre_completo"],
 
-            "plan":tipo_plan,
 
-            "inicio":
-                fecha_inicio.strftime("%d-%m-%Y"),
+            "nombre_completo":
 
-            "fin":
-                fecha_fin.strftime("%d-%m-%Y"),
+                datos["nombre_completo"],
+
+
+
+            "tipo_plan":
+
+                tipo_plan,
+
+
+
+            "fecha_inicio":
+
+                fecha_inicio.strftime(
+                    "%d-%m-%Y"
+                ),
+
+
+
+            "fecha_fin":
+
+                fecha_fin.strftime(
+                    "%d-%m-%Y"
+                ),
+
+
+
+            "estado":
+
+                "Activo",
+
+
 
             "observaciones":
+
                 observaciones
 
-        })
+        }
+
+
+
+
+        resultado = crear_plan(
+            nuevo_plan
+        )
+
+
+
+        if resultado.get("status") == "success":
+
+
+            st.success(
+                "✅ Plan guardado correctamente."
+            )
+
+
+            st.cache_data.clear()
+
+
+            st.rerun()
+
+
+
+        else:
+
+
+            st.error(
+                f"Error guardando plan: {resultado}"
+            )
