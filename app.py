@@ -3,9 +3,18 @@ import streamlit as st
 from config.config import APP_NAME
 from auth.login import mostrar_login
 
+# ==========================================
+# MÓDULOS ADMIN
+# ==========================================
+
 from modules.admin.dashboard import mostrar_dashboard
 from modules.admin.clientes import mostrar_clientes
 from modules.admin.pagos import mostrar_pagos
+from modules.admin.alertas import mostrar_alertas
+
+# ==========================================
+# MÓDULOS CLIENTE
+# ==========================================
 
 from modules.cliente.perfil import mostrar_perfil
 from modules.cliente.evolucion import mostrar_evolucion
@@ -31,20 +40,20 @@ st.markdown(
     """
     <style>
 
-    .stApp {
+    .stApp{
         background-color:#000000;
     }
 
-    h1,h2,h3,h4 {
+    h1,h2,h3,h4{
         color:white !important;
         text-align:center;
     }
 
-    p,label,.stMarkdown {
+    p,label,.stMarkdown{
         color:#dddddd !important;
     }
 
-    div[data-testid="stDecoration"] {
+    div[data-testid="stDecoration"]{
         display:none;
     }
 
@@ -54,14 +63,12 @@ st.markdown(
 )
 
 
-
 # ==========================================
-# INICIALIZAR SESIÓN
+# SESIÓN
 # ==========================================
 
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
-
 
 
 # ==========================================
@@ -72,17 +79,12 @@ def panel_principal():
 
     from auth.permissions import obtener_menu
 
-
-    usuario = st.session_state.get(
-        "usuario",
-        None
-    )
-
+    usuario = st.session_state.get("usuario")
 
     if usuario is None:
 
         st.error(
-            "No existe información del usuario autenticado."
+            "No existe una sesión válida."
         )
 
         st.session_state.clear()
@@ -90,33 +92,24 @@ def panel_principal():
         st.rerun()
 
 
-
-    # ==================================
-    # SIDEBAR USUARIO
-    # ==================================
+    # ======================================
+    # SIDEBAR
+    # ======================================
 
     st.sidebar.title(
         "Julian Avila Platform"
     )
 
-
     st.sidebar.write(
         f"👤 {usuario['nombre']}"
     )
-
 
     st.sidebar.write(
         f"Rol: {usuario['rol']}"
     )
 
-
     st.sidebar.divider()
 
-
-
-    # ==================================
-    # MENÚ SEGÚN ROL
-    # ==================================
 
     opciones = list(
         dict.fromkeys(
@@ -137,13 +130,9 @@ def panel_principal():
     st.sidebar.divider()
 
 
-
-    # ==================================
-    # CERRAR SESIÓN
-    # ==================================
-
     if st.sidebar.button(
-        "Cerrar Sesión"
+        "Cerrar Sesión",
+        use_container_width=True
     ):
 
         st.session_state.clear()
@@ -151,96 +140,105 @@ def panel_principal():
         st.rerun()
 
 
-
-    # ==================================
-    # CONTENIDO PRINCIPAL
-    # ==================================
+    # ======================================
+    # TÍTULO
+    # ======================================
 
     st.title(
         "JULIAN AVILA PLATFORM"
     )
-
 
     st.subheader(
         seleccion
     )
 
 
-
-    # ==================================
+    # ======================================
     # ADMINISTRADOR
-    # ==================================
+    # ======================================
 
     if usuario["rol"] == "Admin":
 
-    if seleccion == "📊 Dashboard":
+        if seleccion == "📊 Dashboard":
 
-        mostrar_dashboard()
+            mostrar_dashboard()
 
-    elif seleccion == "👥 Clientes":
+        elif seleccion == "👥 Clientes":
 
-        mostrar_clientes()
+            mostrar_clientes()
 
-    elif seleccion == "💳 Pagos y Contabilidad":
+        elif seleccion == "💳 Pagos y Contabilidad":
 
-        mostrar_pagos()
+            mostrar_pagos()
 
-    elif seleccion == "🚨 Alertas de Vencimiento":
+        elif seleccion == "🚨 Alertas de Vencimiento":
 
-        mostrar_alertas()
+            mostrar_alertas()
 
-    elif seleccion == "🏋️ Personal Training":
+        elif seleccion == "🏋️ Personal Training":
 
-        st.info("Módulo en construcción.")
+            st.info(
+                "Módulo en construcción."
+            )
 
-    elif seleccion == "📈 Evolución Física":
+        elif seleccion == "📈 Evolución Física":
 
-        st.info("Módulo en construcción.")
+            st.info(
+                "Módulo en construcción."
+            )
 
-    elif seleccion == "📄 Documentos":
+        elif seleccion == "📄 Documentos":
 
-        st.info("Módulo en construcción.")
+            st.info(
+                "Módulo en construcción."
+            )
 
-    elif seleccion == "⚙️ Configuración":
+        elif seleccion == "⚙️ Configuración":
 
-        st.info("Módulo en construcción.")
+            st.info(
+                "Módulo en construcción."
+            )
 
-    else:
+        else:
 
-        st.warning("Opción no disponible.")
+            st.warning(
+                "Opción no disponible."
+            )
 
 
-
-    # ==================================
+    # ======================================
     # CLIENTE
-    # ==================================
+    # ======================================
 
     else:
 
-    if seleccion == "👤 Mi Perfil":
+        if seleccion == "👤 Mi Perfil":
 
-        mostrar_perfil()
+            mostrar_perfil()
 
-    elif seleccion == "📏 Mis Medidas":
+        elif seleccion == "📏 Mis Medidas":
 
-        mostrar_evolucion()
+            mostrar_evolucion()
 
-    elif seleccion == "📈 Mi Evolución":
+        elif seleccion == "📈 Mi Evolución":
 
-        mostrar_evolucion()
+            mostrar_evolucion()
 
-    elif seleccion == "🏋️ Mi Plan Personalizado":
+        elif seleccion == "🏋️ Mi Plan Personalizado":
 
-        mostrar_personalizado()
+            mostrar_personalizado()
 
-    elif seleccion == "📄 Documentos":
+        elif seleccion == "📄 Documentos":
 
-        st.info("Próximamente podrás consultar aquí tus documentos.")
+            st.info(
+                "Próximamente podrás consultar aquí tus documentos."
+            )
 
-    else:
+        else:
 
-        st.warning("Opción no disponible.")
-
+            st.warning(
+                "Opción no disponible."
+            )
 
 
 # ==========================================
@@ -250,7 +248,6 @@ def panel_principal():
 if not st.session_state["autenticado"]:
 
     mostrar_login()
-
 
 else:
 
