@@ -200,3 +200,15 @@ def panel_principal():
             st.info(
                 f"Módulo cliente: {seleccion}"
             )
+            # ==========================================
+# EJECUCIÓN PRINCIPAL
+# ==========================================
+
+if not st.session_state["autenticado"]:
+
+    mostrar_login()
+
+
+else:
+
+    panel_principal()
