@@ -2,6 +2,13 @@ import streamlit as st
 
 from config.config import APP_NAME
 from auth.login import mostrar_login
+from modules.admin.dashboard import mostrar_dashboard
+from modules.admin.clientes import mostrar_clientes
+from modules.admin.pagos import mostrar_pagos
+
+from modules.cliente.perfil import mostrar_perfil
+from modules.cliente.evolucion import mostrar_evolucion
+from modules.cliente.personalizado import mostrar_personalizado
 
 
 # ==========================================
@@ -142,64 +149,65 @@ def panel_principal():
     if usuario["rol"] == "Admin":
 
 
-        if seleccion == "📊 Dashboard":
+    if seleccion == "📊 Dashboard":
 
-            st.info(
-                "Aquí estará el resumen financiero y estadísticas."
-            )
+        mostrar_dashboard()
 
 
-        elif seleccion == "👥 Clientes":
+    elif seleccion == "👥 Clientes":
 
-            st.info(
-                "Aquí estará la gestión completa de clientes."
-            )
+        mostrar_clientes()
 
 
-        elif seleccion == "💳 Pagos y Contabilidad":
+    elif seleccion == "💳 Pagos y Contabilidad":
 
-            st.info(
-                "Aquí estarán pagos parciales, ingresos y contabilidad."
-            )
+        mostrar_pagos()
 
 
-        else:
+    else:
 
-            st.info(
-                f"Módulo administrador: {seleccion}"
-            )
+        st.info(
+            f"Módulo administrador: {seleccion}"
+        )
 
 
 
     else:
 
 
-        if seleccion == "👤 Mi Perfil":
+    if seleccion == "👤 Mi Perfil":
 
-            st.info(
-                "Aquí estará la información personal del cliente."
-            )
+        mostrar_perfil()
 
 
-        elif seleccion == "📏 Mis Medidas":
 
-            st.info(
-                "Aquí estarán las evaluaciones antropométricas."
-            )
+    elif seleccion == "📏 Mis Medidas":
 
 
-        elif seleccion == "📈 Mi Evolución":
-
-            st.info(
-                "Aquí estarán las gráficas de progreso."
-            )
+        mostrar_evolucion()
 
 
-        else:
 
-            st.info(
-                f"Módulo cliente: {seleccion}"
-            )
+    elif seleccion == "📈 Mi Evolución":
+
+
+        mostrar_evolucion()
+
+
+
+    elif seleccion == "🏋️ Mi Plan Personalizado":
+
+
+        mostrar_personalizado()
+
+
+
+    else:
+
+
+        st.info(
+            f"Módulo cliente: {seleccion}"
+        )
             # ==========================================
 # EJECUCIÓN PRINCIPAL
 # ==========================================
