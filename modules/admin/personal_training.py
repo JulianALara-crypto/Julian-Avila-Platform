@@ -116,6 +116,154 @@ def mostrar_personal_training():
 
 
 
+    # ======================================
+    # RESUMEN FÍSICO DEL CLIENTE
+    # ======================================
+
+
+    resumen = resumen_cliente(
+        cedula
+    )
+
+
+
+    if "actual" in resumen:
+
+
+        actual = resumen["actual"]
+
+        inicial = resumen["inicial"]
+
+
+
+        st.divider()
+
+
+        st.subheader(
+            "📊 Estado físico actual"
+        )
+
+
+
+        col1,col2,col3,col4 = st.columns(4)
+
+
+
+        try:
+
+            cambio_peso = (
+
+                float(actual.get("peso_kg",0))
+
+                -
+
+                float(inicial.get("peso_kg",0))
+
+            )
+
+        except:
+
+            cambio_peso = 0
+
+
+
+        try:
+
+            cambio_grasa = (
+
+                float(actual.get("porcentaje_grasa",0))
+
+                -
+
+                float(inicial.get("porcentaje_grasa",0))
+
+            )
+
+        except:
+
+            cambio_grasa = 0
+
+
+
+        try:
+
+            cambio_cintura = (
+
+                float(actual.get("cintura_cm",0))
+
+                -
+
+                float(inicial.get("cintura_cm",0))
+
+            )
+
+        except:
+
+            cambio_cintura = 0
+
+
+
+
+        col1.metric(
+
+            "⚖️ Peso",
+
+            f"{actual.get('peso_kg','')} kg",
+
+            f"{cambio_peso:.1f}"
+
+        )
+
+
+
+        col2.metric(
+
+            "🔥 % Grasa",
+
+            f"{actual.get('porcentaje_grasa','')} %",
+
+            f"{cambio_grasa:.1f}"
+
+        )
+
+
+
+        col3.metric(
+
+            "📏 Cintura",
+
+            f"{actual.get('cintura_cm','')} cm",
+
+            f"{cambio_cintura:.1f}"
+
+        )
+
+
+
+        col4.metric(
+
+            "📊 IMC",
+
+            actual.get(
+                "imc",
+                ""
+            )
+
+        )
+
+
+
+    else:
+
+
+        st.info(
+
+            "Este cliente todavía no tiene evaluaciones físicas."
+
+        )
+
+
+
 
     # ======================================
     # PLAN ACTUAL
@@ -141,6 +289,7 @@ def mostrar_personal_training():
         ]
 
 
+
         if not encontrado.empty:
 
             plan_actual = encontrado.iloc[0]
@@ -161,42 +310,61 @@ def mostrar_personal_training():
     if plan_actual is not None:
 
 
+
         st.success(
+
             plan_actual.get(
+
                 "tipo_plan",
+
                 "Sin nombre"
+
             )
+
         )
 
 
-        col1, col2 = st.columns(2)
+
+        col1,col2 = st.columns(2)
 
 
 
         col1.write(
+
             f"📅 Inicio: {plan_actual.get('fecha_inicio','')}"
+
         )
 
 
+
         col2.write(
+
             f"⏳ Fin: {plan_actual.get('fecha_fin','')}"
+
         )
 
 
 
         st.write(
+
             f"Estado: {plan_actual.get('estado','Activo')}"
+
         )
 
 
+
         if plan_actual.get("observaciones"):
+
 
             st.write(
                 "📝 Observaciones:"
             )
 
+
             st.info(
+
                 plan_actual["observaciones"]
+
             )
 
 
@@ -204,8 +372,11 @@ def mostrar_personal_training():
     else:
 
 
+
         st.info(
+
             "Cliente sin plan personalizado."
+
         )
 
 
@@ -307,7 +478,9 @@ def mostrar_personal_training():
             "fecha_inicio":
 
                 fecha_inicio.strftime(
+
                     "%d-%m-%Y"
+
                 ),
 
 
@@ -315,7 +488,9 @@ def mostrar_personal_training():
             "fecha_fin":
 
                 fecha_fin.strftime(
+
                     "%d-%m-%Y"
+
                 ),
 
 
@@ -336,7 +511,9 @@ def mostrar_personal_training():
 
 
         resultado = crear_plan(
+
             nuevo_plan
+
         )
 
 
@@ -345,11 +522,11 @@ def mostrar_personal_training():
 
 
             st.success(
+
                 "✅ Plan guardado correctamente."
+
             )
 
-
-            # Actualizar solamente planes
 
             cargar_planes.clear()
 
@@ -362,5 +539,7 @@ def mostrar_personal_training():
 
 
             st.error(
+
                 f"❌ Error guardando plan: {resultado}"
+
             )
