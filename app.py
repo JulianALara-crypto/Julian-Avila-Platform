@@ -13,6 +13,7 @@ from modules.admin.clientes import mostrar_clientes
 from modules.admin.pagos import mostrar_pagos
 from modules.admin.alertas import mostrar_alertas
 from modules.admin.personal_training import mostrar_personal_training
+from modules.admin.evolucion import mostrar_evolucion_admin
 
 
 # ==========================================
@@ -101,11 +102,9 @@ def panel_principal():
 
     if usuario is None:
 
-
         st.error(
             "No existe una sesión válida."
         )
-
 
         st.session_state.clear()
 
@@ -216,9 +215,7 @@ def panel_principal():
     if usuario["rol"] == "Admin":
 
 
-
         if seleccion == "📊 Dashboard":
-
 
             mostrar_dashboard()
 
@@ -226,13 +223,11 @@ def panel_principal():
 
         elif seleccion == "👥 Clientes":
 
-
             mostrar_clientes()
 
 
 
         elif seleccion == "💳 Pagos y Contabilidad":
-
 
             mostrar_pagos()
 
@@ -240,13 +235,11 @@ def panel_principal():
 
         elif seleccion == "🚨 Alertas de Vencimiento":
 
-
             mostrar_alertas()
 
 
 
         elif seleccion == "🏋️ Personal Training":
-
 
             mostrar_personal_training()
 
@@ -254,15 +247,11 @@ def panel_principal():
 
         elif seleccion == "📈 Evolución Física":
 
-
-            st.info(
-                "Módulo en construcción."
-            )
+            mostrar_evolucion_admin()
 
 
 
         elif seleccion == "📄 Documentos":
-
 
             st.info(
                 "Módulo en construcción."
@@ -272,7 +261,6 @@ def panel_principal():
 
         elif seleccion == "⚙️ Configuración":
 
-
             st.info(
                 "Módulo en construcción."
             )
@@ -280,7 +268,6 @@ def panel_principal():
 
 
         else:
-
 
             st.warning(
                 "Opción no disponible."
@@ -297,9 +284,7 @@ def panel_principal():
     else:
 
 
-
         if seleccion == "👤 Mi Perfil":
-
 
             mostrar_perfil()
 
@@ -307,13 +292,11 @@ def panel_principal():
 
         elif seleccion == "📏 Mis Medidas":
 
-
             mostrar_evolucion()
 
 
 
         elif seleccion == "📈 Mi Evolución":
-
 
             mostrar_evolucion()
 
@@ -321,13 +304,11 @@ def panel_principal():
 
         elif seleccion == "🏋️ Mi Plan Personalizado":
 
-
             mostrar_personalizado()
 
 
 
         elif seleccion == "📄 Documentos":
-
 
             st.info(
                 "Próximamente podrás consultar aquí tus documentos."
@@ -336,7 +317,6 @@ def panel_principal():
 
 
         else:
-
 
             st.warning(
                 "Opción no disponible."
@@ -351,12 +331,9 @@ def panel_principal():
 
 if not st.session_state["autenticado"]:
 
-
     mostrar_login()
 
 
-
 else:
-
 
     panel_principal()
