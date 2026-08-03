@@ -48,9 +48,32 @@ def mostrar_evolucion_admin():
 
 
 
+    # ======================================
+    # LIMPIEZA DE DATOS
+    # ======================================
+
+    # Limpia espacios en nombres de columnas
+
+    registros.columns = (
+        registros.columns
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # Elimina columnas duplicadas
+
+    registros = registros.loc[
+        :,
+        ~registros.columns.duplicated()
+    ]
+
+
+
     st.subheader(
         "📋 Historial de evaluaciones"
     )
+
 
 
     st.dataframe(
