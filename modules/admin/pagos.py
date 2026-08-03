@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 
 from database.gimnasio import cargar_clientes_gym
+from database.pagos import registrar_pago
 
 
 # ==========================================
@@ -197,20 +198,45 @@ def mostrar_pagos():
 
 
     if st.button(
-        "Guardar pago"
-    ):
+    "Guardar pago"
+):
+
+
+    cliente = clientes[
+        clientes["nombre_completo"] == cliente_pago
+    ].iloc[0]
+
+
+
+    resultado = registrar_pago(
+
+        cliente["cedula"],
+
+        cliente["nombre_completo"],
+
+        valor,
+
+        "Pago Personalizado"
+
+    )
+
+
+
+    if resultado.get("status") == "success":
 
 
         st.success(
-            f"Pago registrado correctamente para {cliente_pago}"
+            "✅ Pago guardado correctamente"
         )
 
 
-        st.write(
-            f"Fecha automática: {fecha_pago}"
-        )
+        st.cache_data.clear()
 
 
-        st.write(
-            f"Valor: ${valor:,}"
+
+    else:
+
+
+        st.error(
+            resultado
         )
