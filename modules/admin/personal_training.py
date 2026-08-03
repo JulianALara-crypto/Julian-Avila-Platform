@@ -161,7 +161,10 @@ def mostrar_personal_training():
 
 
         st.success(
-            plan_actual["tipo_plan"]
+            plan_actual.get(
+                "tipo_plan",
+                "Sin nombre"
+            )
         )
 
 
@@ -170,12 +173,12 @@ def mostrar_personal_training():
 
 
         col1.write(
-            f"Inicio: {plan_actual['fecha_inicio']}"
+            f"📅 Inicio: {plan_actual.get('fecha_inicio','')}"
         )
 
 
         col2.write(
-            f"Fin: {plan_actual['fecha_fin']}"
+            f"⏳ Fin: {plan_actual.get('fecha_fin','')}"
         )
 
 
@@ -183,6 +186,17 @@ def mostrar_personal_training():
         st.write(
             f"Estado: {plan_actual.get('estado','Activo')}"
         )
+
+
+        if plan_actual.get("observaciones"):
+
+            st.write(
+                "📝 Observaciones:"
+            )
+
+            st.info(
+                plan_actual["observaciones"]
+            )
 
 
 
@@ -262,10 +276,9 @@ def mostrar_personal_training():
 
             +
 
-            timedelta(days=dias)
+            timedelta(days=int(dias))
 
         )
-
 
 
 
@@ -327,7 +340,7 @@ def mostrar_personal_training():
 
 
 
-        if resultado.get("status") == "success":
+        if isinstance(resultado, dict) and resultado.get("status") == "success":
 
 
             st.success(
@@ -335,7 +348,9 @@ def mostrar_personal_training():
             )
 
 
-            st.cache_data.clear()
+            # Actualizar solamente planes
+
+            cargar_planes.clear()
 
 
             st.rerun()
@@ -346,5 +361,5 @@ def mostrar_personal_training():
 
 
             st.error(
-                f"Error guardando plan: {resultado}"
+                f"❌ Error guardando plan: {resultado}"
             )
