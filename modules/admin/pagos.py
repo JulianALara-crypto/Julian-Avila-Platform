@@ -1,14 +1,17 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+
 
 from database.gimnasio import cargar_clientes_gym
-from database.pagos import registrar_pago
+from database.pagos import (
+    cargar_pagos,
+    registrar_pago
+)
 
 
 
 # ==========================================
-# PAGOS Y CONTABILIDAD ADMIN
+# PAGOS Y CONTABILIDAD
 # ==========================================
 
 def mostrar_pagos():
@@ -21,6 +24,60 @@ def mostrar_pagos():
 
     clientes = cargar_clientes_gym()
 
+    pagos = cargar_pagos()
+
+
+
+    # ======================================
+    # MÉTRICAS
+    # ======================================
+
+    col1,col2,col3 = st.columns(3)
+
+
+
+    if not pagos.empty:
+
+
+        total_pagado = pagos["valor"].sum()
+
+
+    else:
+
+        total_pagado = 0
+
+
+
+    col1.metric(
+        "💰 Total recaudado",
+        f"${int(total_pagado):,}"
+    )
+
+
+    col2.metric(
+        "👥 Clientes",
+        len(clientes)
+    )
+
+
+    col3.metric(
+        "🧾 Pagos registrados",
+        len(pagos)
+    )
+
+
+
+    st.divider()
+
+
+
+    # ======================================
+    # REGISTRAR NUEVO PAGO
+    # ======================================
+
+    st.subheader(
+        "➕ Registrar nuevo pago"
+    )
 
 
     if clientes.empty:
@@ -33,147 +90,21 @@ def mostrar_pagos():
 
 
 
-    # ======================================
-    # NORMALIZAR DATOS
-    # ======================================
+    cliente_nombre = st.selectbox(
 
-    clientes["valor_pagado"] = pd.to_numeric(
-        clientes["valor_pagado"],
-        errors="coerce"
-    ).fillna(0)
-
-
-
-    total_clientes = len(clientes)
-
-
-    ingresos = clientes["valor_pagado"].sum()
-
-
-
-    activos = 0
-
-
-    hoy = datetime.today().date()
-
-
-
-    for fecha in clientes["fecha_vencimiento"]:
-
-        try:
-
-            vencimiento = datetime.strptime(
-                fecha,
-                "%d-%m-%Y"
-            ).date()
-
-
-            if vencimiento >= hoy:
-
-                activos += 1
-
-
-        except:
-
-            pass
-
-
-
-    # ======================================
-    # MÉTRICAS
-    # ======================================
-
-    col1, col2, col3 = st.columns(3)
-
-
-    col1.metric(
-        "👥 Clientes",
-        total_clientes
-    )
-
-
-    col2.metric(
-        "🟢 Activos",
-        activos
-    )
-
-
-    col3.metric(
-        "💰 Ingresos registrados",
-        f"${int(ingresos):,}"
-    )
-
-
-
-    st.divider()
-
-
-
-    # ======================================
-    # TABLA CLIENTES
-    # ======================================
-
-    st.subheader(
-        "📋 Pagos actuales"
-    )
-
-
-    columnas = [
-
-        "nombre_completo",
-        "cedula",
-        "fecha_ingreso",
-        "valor_pagado",
-        "metodo_pago",
-        "fecha_vencimiento"
-
-    ]
-
-
-
-    disponibles = [
-
-        columna
-
-        for columna in columnas
-
-        if columna in clientes.columns
-
-    ]
-
-
-
-    st.dataframe(
-
-        clientes[disponibles],
-
-        use_container_width=True
-
-    )
-
-
-
-    st.divider()
-
-
-
-    # ======================================
-    # NUEVO PAGO
-    # ======================================
-
-    st.subheader(
-        "➕ Registrar nuevo pago"
-    )
-
-
-
-    cliente_pago = st.selectbox(
-
-        "Cliente",
+        "Seleccionar cliente",
 
         clientes["nombre_completo"].tolist()
 
     )
+
+
+
+    cliente = clientes[
+        clientes["nombre_completo"]
+        ==
+        cliente_nombre
+    ].iloc[0]
 
 
 
@@ -195,9 +126,11 @@ def mostrar_pagos():
 
         [
 
-            "Pago Personalizado",
+            "Mensualidad",
 
-            "Abono mensualidad",
+            "Abono personalizado",
+
+            "Pago parcial",
 
             "Otro"
 
@@ -208,15 +141,8 @@ def mostrar_pagos():
 
 
     if st.button(
-        "Guardar pago"
+        "💾 Guardar pago"
     ):
-
-
-        cliente = clientes[
-            clientes["nombre_completo"]
-            ==
-            cliente_pago
-        ].iloc[0]
 
 
 
@@ -238,17 +164,111 @@ def mostrar_pagos():
 
 
             st.success(
-                "✅ Pago guardado correctamente"
+                "Pago registrado correctamente."
             )
 
 
             st.cache_data.clear()
 
+            st.rerun()
+
 
 
         else:
 
-
             st.error(
                 resultado
             )
+
+
+
+    st.divider()
+
+
+
+    # ======================================
+    # HISTORIAL PAGOS
+    # ======================================
+
+
+    st.subheader(
+        "📋 Historial de pagos"
+    )
+
+
+
+    if pagos.empty:
+
+
+        st.info(
+            "Aún no existen pagos registrados."
+        )
+
+
+    else:
+
+
+        filtro = st.selectbox(
+
+            "Filtrar cliente",
+
+            [
+
+                "Todos"
+
+            ]
+            +
+            pagos["nombre_completo"]
+            .unique()
+            .tolist()
+
+        )
+
+
+
+        tabla = pagos.copy()
+
+
+
+        if filtro != "Todos":
+
+            tabla = tabla[
+                tabla["nombre_completo"]
+                ==
+                filtro
+            ]
+
+
+
+        st.dataframe(
+
+            tabla,
+
+            use_container_width=True
+
+        )
+
+
+
+        st.divider()
+
+
+
+        st.subheader(
+            "📈 Ingresos"
+        )
+
+
+
+        grafica = (
+            pagos
+            .groupby(
+                "fecha_pago"
+            )["valor"]
+            .sum()
+        )
+
+
+        st.line_chart(
+            grafica
+        )
