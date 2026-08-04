@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from database.medidas import obtener_medidas_cliente
+from database.resumen_cliente import resumen_cliente
 
 
 
