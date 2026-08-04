@@ -1,13 +1,20 @@
 import streamlit as st
+import pandas as pd
+
 from datetime import datetime, timedelta
 
 from database.gimnasio import cargar_clientes_gym
+
 from database.planes import (
     cargar_planes,
     crear_plan,
     renovar_plan
 )
+
 from database.resumen_cliente import resumen_cliente
+
+from database.historial import construir_historial_cliente
+
 
 
 
@@ -26,6 +33,7 @@ PLANES = [
     "Competición"
 
 ]
+
 
 
 
@@ -48,6 +56,7 @@ def mostrar_personal_training():
 
     if clientes.empty:
 
+
         st.warning(
             "No existen clientes registrados."
         )
@@ -58,7 +67,9 @@ def mostrar_personal_training():
 
 
     cedula = st.text_input(
+
         "Buscar cliente por cédula"
+
     )
 
 
@@ -67,7 +78,9 @@ def mostrar_personal_training():
 
 
         st.info(
+
             "Ingrese una cédula para comenzar."
+
         )
 
         return
@@ -89,7 +102,9 @@ def mostrar_personal_training():
 
 
         st.warning(
+
             "Cliente no encontrado."
+
         )
 
         return
@@ -111,8 +126,11 @@ def mostrar_personal_training():
 
 
     st.write(
+
         datos["nombre_completo"]
+
     )
+
 
 
 
@@ -138,21 +156,44 @@ def mostrar_personal_training():
         st.divider()
 
 
+
         st.subheader(
+
             "📊 Estado físico actual"
+
         )
 
 
 
-        col1,col2,col3,col4 = st.columns(4)
+        col1, col2, col3, col4 = st.columns(4)
 
 
 
         try:
 
-            peso = float(actual.get("peso_kg",0))
+            peso = float(
 
-            peso_ini = float(inicial.get("peso_kg",0))
+                actual.get(
+
+                    "peso_kg",
+
+                    0
+
+                )
+
+            )
+
+            peso_ini = float(
+
+                inicial.get(
+
+                    "peso_kg",
+
+                    0
+
+                )
+
+            )
 
         except:
 
@@ -162,11 +203,32 @@ def mostrar_personal_training():
 
 
 
+
         try:
 
-            grasa = float(actual.get("porcentaje_grasa",0))
+            grasa = float(
 
-            grasa_ini = float(inicial.get("porcentaje_grasa",0))
+                actual.get(
+
+                    "porcentaje_grasa",
+
+                    0
+
+                )
+
+            )
+
+            grasa_ini = float(
+
+                inicial.get(
+
+                    "porcentaje_grasa",
+
+                    0
+
+                )
+
+            )
 
         except:
 
@@ -176,11 +238,32 @@ def mostrar_personal_training():
 
 
 
+
         try:
 
-            cintura = float(actual.get("cintura_cm",0))
+            cintura = float(
 
-            cintura_ini = float(inicial.get("cintura_cm",0))
+                actual.get(
+
+                    "cintura_cm",
+
+                    0
+
+                )
+
+            )
+
+            cintura_ini = float(
+
+                inicial.get(
+
+                    "cintura_cm",
+
+                    0
+
+                )
+
+            )
 
         except:
 
@@ -190,33 +273,55 @@ def mostrar_personal_training():
 
 
 
+
         col1.metric(
+
             "⚖️ Peso",
+
             f"{peso} kg",
+
             f"{peso-peso_ini:.1f}"
+
         )
+
 
 
         col2.metric(
+
             "🔥 % Grasa",
+
             f"{grasa} %",
+
             f"{grasa-grasa_ini:.1f}"
+
         )
+
 
 
         col3.metric(
+
             "📏 Cintura",
+
             f"{cintura} cm",
+
             f"{cintura-cintura_ini:.1f}"
+
         )
 
 
+
         col4.metric(
+
             "📊 IMC",
+
             actual.get(
+
                 "imc",
+
                 ""
+
             )
+
         )
 
 
@@ -225,8 +330,11 @@ def mostrar_personal_training():
 
 
         st.info(
+
             "Este cliente todavía no tiene evaluaciones físicas."
+
         )
+
 
 
 
@@ -249,15 +357,20 @@ def mostrar_personal_training():
         encontrado = planes[
 
             planes["cedula"].astype(str)
+
             ==
+
             str(cedula)
 
         ]
 
 
+
         if not encontrado.empty:
 
+
             plan_actual = encontrado.iloc[0]
+
 
 
 
@@ -267,7 +380,9 @@ def mostrar_personal_training():
 
 
     st.subheader(
+
         "🏋️ Plan actual"
+
     )
 
 
@@ -275,18 +390,22 @@ def mostrar_personal_training():
     if plan_actual is not None:
 
 
+
         st.success(
 
             plan_actual.get(
+
                 "tipo_plan",
+
                 "Sin nombre"
+
             )
 
         )
 
 
 
-        col1,col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
 
 
@@ -295,6 +414,7 @@ def mostrar_personal_training():
             f"📅 Inicio: {plan_actual.get('fecha_inicio','')}"
 
         )
+
 
 
         col2.write(
@@ -317,7 +437,9 @@ def mostrar_personal_training():
 
 
             st.write(
+
                 "📝 Observaciones:"
+
             )
 
 
@@ -329,6 +451,7 @@ def mostrar_personal_training():
 
 
 
+
         # ======================================
         # RENOVAR PLAN
         # ======================================
@@ -337,8 +460,11 @@ def mostrar_personal_training():
         st.divider()
 
 
+
         st.subheader(
+
             "🔄 Renovar plan"
+
         )
 
 
@@ -409,6 +535,7 @@ def mostrar_personal_training():
 
                 cargar_planes.clear()
 
+
                 st.rerun()
 
 
@@ -436,7 +563,84 @@ def mostrar_personal_training():
 
 
 
+
+    # ======================================
+    # HISTORIAL CLIENTE
+    # ======================================
+
+
     st.divider()
+
+
+
+    st.subheader(
+
+        "📜 Historial del cliente"
+
+    )
+
+
+
+    historial = construir_historial_cliente(
+
+        cedula
+
+    )
+
+
+
+    if not historial.empty:
+
+
+        historial_visual = historial.copy()
+
+
+
+        if "fecha" in historial_visual.columns:
+
+
+            historial_visual["fecha"] = (
+
+                pd.to_datetime(
+
+                    historial_visual["fecha"],
+
+                    errors="coerce"
+
+                )
+
+                .dt.strftime(
+
+                    "%d-%m-%Y"
+
+                )
+
+            )
+
+
+
+        st.dataframe(
+
+            historial_visual,
+
+            use_container_width=True,
+
+            hide_index=True
+
+        )
+
+
+
+    else:
+
+
+        st.info(
+
+            "No existe historial registrado."
+
+        )
+
+
 
 
 
@@ -445,8 +649,14 @@ def mostrar_personal_training():
     # ======================================
 
 
+    st.divider()
+
+
+
     st.subheader(
+
         "➕ Asignar nuevo plan"
+
     )
 
 
@@ -482,6 +692,7 @@ def mostrar_personal_training():
 
 
 
+
     if st.button(
 
         "Guardar Plan",
@@ -502,7 +713,11 @@ def mostrar_personal_training():
 
             +
 
-            timedelta(days=int(dias))
+            timedelta(
+
+                days=int(dias)
+
+            )
 
         )
 
@@ -532,7 +747,9 @@ def mostrar_personal_training():
             "fecha_inicio":
 
                 fecha_inicio.strftime(
+
                     "%d-%m-%Y"
+
                 ),
 
 
@@ -540,7 +757,9 @@ def mostrar_personal_training():
             "fecha_fin":
 
                 fecha_fin.strftime(
+
                     "%d-%m-%Y"
+
                 ),
 
 
