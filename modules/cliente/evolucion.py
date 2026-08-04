@@ -21,13 +21,15 @@ def mostrar_evolucion():
     )
 
 
-    registros = obtener_medidas_cliente(
+
+    resumen = resumen_cliente(
         cedula
     )
 
 
 
-    if registros.empty:
+    if "historial" not in resumen:
+
 
         st.info(
             "Todavía no tienes evaluaciones registradas."
@@ -37,31 +39,70 @@ def mostrar_evolucion():
 
 
 
-    # ==============================
+    registros = resumen["historial"].copy()
+
+
+
+    if registros.empty:
+
+
+        st.info(
+            "Todavía no tienes evaluaciones registradas."
+        )
+
+        return
+
+
+
+    # =====================================
     # ORDEN CRONOLÓGICO
-    # ==============================
+    # =====================================
 
 
     if "fecha_evaluacion" in registros.columns:
 
 
         registros["_fecha"] = pd.to_datetime(
+
             registros["fecha_evaluacion"],
+
             errors="coerce",
+
             dayfirst=True
+
         )
 
 
         registros = (
+
             registros
+
             .sort_values(
                 "_fecha"
             )
+
             .drop(
                 columns=["_fecha"]
             )
+
         )
 
+
+
+    inicial = resumen.get(
+        "inicial"
+    )
+
+
+    actual = resumen.get(
+        "actual"
+    )
+
+
+
+    # =====================================
+    # RESUMEN DE PROGRESO
+    # =====================================
 
 
     st.subheader(
@@ -70,12 +111,7 @@ def mostrar_evolucion():
 
 
 
-    if len(registros) >= 2:
-
-
-        inicial = registros.iloc[0]
-
-        actual = registros.iloc[-1]
+    if inicial is not None and actual is not None:
 
 
 
@@ -84,10 +120,14 @@ def mostrar_evolucion():
             columna
         ):
 
+
             try:
 
                 return float(
-                    fila[columna]
+                    fila.get(
+                        columna,
+                        0
+                    )
                 )
 
             except:
@@ -132,28 +172,94 @@ def mostrar_evolucion():
 
 
 
-        c1,c2,c3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
 
 
 
-        c1.metric(
-            "Peso actual",
-            f"{peso_a} kg",
-            f"{peso_a-peso_i:.1f}"
+        col1.metric(
+
+            "⚖️ Peso",
+
+            f"{peso_a:.1f} kg",
+
+            f"{peso_a - peso_i:.1f} kg"
+
         )
 
 
-        c2.metric(
-            "% Grasa",
-            f"{grasa_a} %",
-            f"{grasa_a-grasa_i:.1f}"
+
+        col2.metric(
+
+            "🔥 Grasa corporal",
+
+            f"{grasa_a:.1f} %",
+
+            f"{grasa_a - grasa_i:.1f} %"
+
         )
 
 
-        c3.metric(
-            "Cintura",
-            f"{cintura_a} cm",
-            f"{cintura_a-cintura_i:.1f}"
+
+        col3.metric(
+
+            "📏 Cintura",
+
+            f"{cintura_a:.1f} cm",
+
+            f"{cintura_a - cintura_i:.1f} cm"
+
+        )
+
+
+
+        st.write("")
+
+
+
+        resumen_tabla = pd.DataFrame({
+
+            "Medida": [
+
+                "Peso",
+
+                "Grasa corporal",
+
+                "Cintura"
+
+            ],
+
+            "Inicial": [
+
+                f"{peso_i:.1f}",
+
+                f"{grasa_i:.1f}",
+
+                f"{cintura_i:.1f}"
+
+            ],
+
+            "Actual": [
+
+                f"{peso_a:.1f}",
+
+                f"{grasa_a:.1f}",
+
+                f"{cintura_a:.1f}"
+
+            ]
+
+        })
+
+
+
+        st.dataframe(
+
+            resumen_tabla,
+
+            hide_index=True,
+
+            use_container_width=True
+
         )
 
 
@@ -162,14 +268,15 @@ def mostrar_evolucion():
 
 
 
-    # ==============================
+    # =====================================
     # GRÁFICAS
-    # ==============================
+    # =====================================
 
 
     st.subheader(
         "📈 Tendencia"
     )
+
 
 
     datos = registros.copy()
@@ -203,8 +310,11 @@ def mostrar_evolucion():
 
     disponibles = [
 
-        c for c in columnas
-        if c in datos.columns
+        columna
+
+        for columna in columnas
+
+        if columna in datos.columns
 
     ]
 
@@ -214,11 +324,17 @@ def mostrar_evolucion():
 
 
         datos_grafica = datos[
+
             disponibles
+
         ].apply(
+
             pd.to_numeric,
+
             errors="coerce"
+
         )
+
 
 
         st.line_chart(
@@ -227,8 +343,22 @@ def mostrar_evolucion():
 
 
 
+    else:
+
+
+        st.info(
+            "No hay datos suficientes para generar gráficos."
+        )
+
+
+
     st.divider()
 
+
+
+    # =====================================
+    # HISTORIAL COMPLETO
+    # =====================================
 
 
     st.subheader(
@@ -236,7 +366,13 @@ def mostrar_evolucion():
     )
 
 
+
     st.dataframe(
+
         registros.astype(str),
-        use_container_width=True
+
+        use_container_width=True,
+
+        hide_index=True
+
     )
