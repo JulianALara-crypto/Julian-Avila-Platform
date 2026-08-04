@@ -62,12 +62,11 @@ def mostrar_alertas():
     if planes.empty:
         st.info("No existen planes registrados.")
     else:
-        planes = planes.copy()
         planes["fecha_dt"] = pd.to_datetime(
-            planes["fecha_fin"],
-            dayfirst=True,
-            errors="coerce",
-        )
+    planes["fecha_fin"],
+    dayfirst=True,
+    errors="coerce"
+).dt.date
 
         alertas = planes[
             planes["fecha_dt"].notna() &
