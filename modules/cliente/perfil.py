@@ -2,6 +2,7 @@ import streamlit as st
 
 from database.usuarios import cargar_usuarios
 from database.gimnasio import buscar_cliente_gym
+from database.historial import construir_historial_cliente
 
 
 
@@ -25,6 +26,8 @@ def formatear_fecha(valor):
     except:
 
         return valor
+
+
 
 
 
@@ -64,9 +67,11 @@ def mostrar_perfil():
 
 
     datos = usuarios[
+
         usuarios["cedula"].astype(str)
         ==
         cedula
+
     ]
 
 
@@ -86,15 +91,17 @@ def mostrar_perfil():
 
 
     st.subheader(
+
         cliente.get(
             "nombre_completo",
             "Cliente"
         )
+
     )
 
 
 
-    col1,col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
 
 
@@ -174,10 +181,12 @@ def mostrar_perfil():
 
 
     st.info(
+
         cliente.get(
             "condiciones_medicas",
             "Sin registros"
         )
+
     )
 
 
@@ -210,20 +219,28 @@ def mostrar_perfil():
 
 
 
-        col1,col2,col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
 
 
 
         with col1:
 
             st.metric(
+
                 "Fecha inicio",
+
                 formatear_fecha(
+
                     datos_gym.get(
+
                         "fecha_ingreso",
+
                         ""
+
                     )
+
                 )
+
             )
 
 
@@ -231,35 +248,51 @@ def mostrar_perfil():
         with col2:
 
             st.metric(
+
                 "Vencimiento",
+
                 formatear_fecha(
+
                     datos_gym.get(
+
                         "fecha_vencimiento",
+
                         ""
+
                     )
+
                 )
+
             )
 
 
 
         with col3:
 
-            dias = datos_gym.get(
-                "tipo_plan",
-                "Membresía"
-            )
 
             st.metric(
+
                 "Plan",
-                dias
+
+                datos_gym.get(
+
+                    "tipo_plan",
+
+                    "Membresía"
+
+                )
+
             )
 
 
 
     else:
 
+
         st.info(
+
             "No tienes una membresía registrada en gimnasio."
+
         )
 
 
@@ -272,6 +305,7 @@ def mostrar_perfil():
     st.divider()
 
 
+
     st.subheader(
         "💪 Personal Training"
     )
@@ -281,41 +315,140 @@ def mostrar_perfil():
     if "fecha_inicio_personalizado" in cliente.index:
 
 
+
         st.success(
+
             "Tienes un plan personalizado activo."
+
         )
 
 
-        c1,c2 = st.columns(2)
+
+        c1, c2 = st.columns(2)
 
 
 
         c1.metric(
+
             "Inicio",
+
             formatear_fecha(
+
                 cliente.get(
+
                     "fecha_inicio_personalizado",
+
                     ""
+
                 )
+
             )
+
         )
 
 
 
         c2.metric(
+
             "Vencimiento",
+
             formatear_fecha(
+
                 cliente.get(
+
                     "fecha_vencimiento_personalizado",
+
                     ""
+
                 )
+
             )
+
         )
 
 
 
     else:
 
+
         st.info(
+
             "No tienes un plan personalizado activo."
+
+        )
+
+
+
+
+
+    # =====================================
+    # HISTORIAL DEL CLIENTE
+    # =====================================
+
+
+    st.divider()
+
+
+
+    st.subheader(
+        "📜 Historial de actividad"
+    )
+
+
+
+    historial = construir_historial_cliente(
+        cedula
+    )
+
+
+
+    if not historial.empty:
+
+
+        historial_visual = historial.copy()
+
+
+
+        if "fecha" in historial_visual.columns:
+
+
+            historial_visual["fecha"] = (
+
+                pd.to_datetime(
+
+                    historial_visual["fecha"],
+
+                    errors="coerce"
+
+                )
+
+                .dt.strftime(
+
+                    "%d-%m-%Y"
+
+                )
+
+            )
+
+
+
+        st.dataframe(
+
+            historial_visual,
+
+            use_container_width=True,
+
+            hide_index=True
+
+        )
+
+
+
+    else:
+
+
+        st.info(
+
+            "Todavía no tienes actividad registrada."
+
         )
