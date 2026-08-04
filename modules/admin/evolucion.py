@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from database.medidas import obtener_medidas_cliente
-from database.usuarios import cargar_usuarios
+from database.gimnasio import cargar_clientes_gym
 
 
 
@@ -12,105 +12,79 @@ from database.usuarios import cargar_usuarios
 
 def mostrar_evolucion_admin():
 
+
     st.header(
         "📈 Evolución Física Clientes"
     )
 
 
-    cedula = st.text_input(
-        "Buscar cliente por cédula"
-    )
+
+    # ======================================
+    # SELECCIÓN CLIENTE
+    # ======================================
+
+
+    clientes = cargar_clientes_gym()
 
 
 
-    if not cedula:
+    if clientes.empty:
 
-        st.info(
-            "Ingrese una cédula para consultar evolución."
-        )
-
-        return
-
-
-
-    registros = obtener_medidas_cliente(
-        cedula
-    )
-
-
-
-    if registros.empty:
 
         st.warning(
-            "No existen evaluaciones para este cliente."
+            "No existen clientes registrados."
         )
 
         return
 
 
 
-    # ======================================
-    # LIMPIEZA
-    # ======================================
+    opciones = (
 
-    registros.columns = (
-        registros.columns
+        clientes["nombre_completo"]
+
         .astype(str)
-        .str.strip()
-        .str.lower()
+
+        .tolist()
+
     )
 
 
-    registros = registros.loc[
-        :,
-        ~registros.columns.duplicated()
-    ]
 
+    seleccionado = st.selectbox(
 
+        "Seleccionar cliente",
 
-    # ======================================
-    # NOMBRE CLIENTE
-    # ======================================
+        opciones
 
-    nombre = "Cliente"
-
-
-    try:
-
-        usuarios = cargar_usuarios()
-
-
-        if not usuarios.empty:
-
-            encontrado = usuarios[
-
-                usuarios["cedula"]
-                .astype(str)
-                ==
-                str(cedula)
-
-            ]
-
-
-            if not encontrado.empty:
-
-                nombre = encontrado.iloc[0][
-                    "nombre_completo"
-                ]
-
-    except:
-
-        pass
-
-
-
-    st.subheader(
-        f"👤 {nombre}"
     )
+
+
+
+    cliente = clientes[
+
+        clientes["nombre_completo"]
+
+        ==
+
+        seleccionado
+
+    ].iloc[0]
+
+
+
+    cedula = str(
+
+        cliente["cedula"]
+
+    )
+
 
 
     st.write(
+
         f"🪪 Cédula: {cedula}"
+
     )
 
 
@@ -119,9 +93,74 @@ def mostrar_evolucion_admin():
 
 
 
+    registros = obtener_medidas_cliente(
+
+        cedula
+
+    )
+
+
+
+    if registros.empty:
+
+
+        st.warning(
+
+            "No existen evaluaciones para este cliente."
+
+        )
+
+        return
+
+
+
+
+
+    # ======================================
+    # LIMPIEZA
+    # ======================================
+
+
+    registros.columns = (
+
+        registros.columns
+
+        .astype(str)
+
+        .str.strip()
+
+        .str.lower()
+
+    )
+
+
+
+    registros = registros.loc[
+
+        :,
+
+        ~registros.columns.duplicated()
+
+    ]
+
+
+
+
+
+    st.subheader(
+
+        f"👤 {cliente['nombre_completo']}"
+
+    )
+
+
+
+
+
     # ======================================
     # ORDENAR EVALUACIONES
     # ======================================
+
 
     if "fecha_evaluacion" in registros.columns:
 
@@ -140,10 +179,22 @@ def mostrar_evolucion_admin():
         registros = (
 
             registros
-            .sort_values("_fecha")
-            .drop(columns="_fecha")
+
+            .sort_values(
+
+                "_fecha"
+
+            )
+
+            .drop(
+
+                columns="_fecha"
+
+            )
 
         )
+
+
 
 
 
@@ -153,90 +204,139 @@ def mostrar_evolucion_admin():
 
 
 
+
+
     # ======================================
     # FUNCIÓN NUMÉRICA
     # ======================================
 
+
     def valor(
+
         fila,
+
         columna
+
     ):
+
 
         try:
 
+
             return float(
+
                 fila[columna]
+
             )
 
+
         except:
+
 
             return 0
 
 
 
+
+
     peso_i = valor(
+
         inicial,
+
         "peso_kg"
+
     )
 
+
     peso_a = valor(
+
         actual,
+
         "peso_kg"
+
     )
 
 
 
     grasa_i = valor(
+
         inicial,
+
         "porcentaje_grasa"
+
     )
 
+
     grasa_a = valor(
+
         actual,
+
         "porcentaje_grasa"
+
     )
 
 
 
     cintura_i = valor(
+
         inicial,
+
         "cintura_cm"
+
     )
 
+
     cintura_a = valor(
+
         actual,
+
         "cintura_cm"
+
     )
 
 
 
     pecho_i = valor(
+
         inicial,
+
         "pecho_cm"
+
     )
+
 
     pecho_a = valor(
+
         actual,
+
         "pecho_cm"
+
     )
 
 
 
+
+
     # ======================================
-    # TARJETAS DE PROGRESO
+    # PROGRESO
     # ======================================
+
 
     st.subheader(
+
         "📊 Progreso"
+
     )
+
 
 
     c1,c2,c3,c4 = st.columns(4)
 
 
+
     c1.metric(
 
-        "Peso",
+        "⚖️ Peso",
 
         f"{peso_a} kg",
 
@@ -245,9 +345,10 @@ def mostrar_evolucion_admin():
     )
 
 
+
     c2.metric(
 
-        "% Grasa",
+        "🔥 % Grasa",
 
         f"{grasa_a}%",
 
@@ -256,9 +357,10 @@ def mostrar_evolucion_admin():
     )
 
 
+
     c3.metric(
 
-        "Cintura",
+        "📏 Cintura",
 
         f"{cintura_a} cm",
 
@@ -267,9 +369,10 @@ def mostrar_evolucion_admin():
     )
 
 
+
     c4.metric(
 
-        "Pecho",
+        "💪 Pecho",
 
         f"{pecho_a} cm",
 
@@ -279,7 +382,11 @@ def mostrar_evolucion_admin():
 
 
 
+
+
     st.divider()
+
+
 
 
 
@@ -287,9 +394,13 @@ def mostrar_evolucion_admin():
     # GRÁFICA
     # ======================================
 
+
     st.subheader(
+
         "📈 Tendencia"
+
     )
+
 
 
     columnas = [
@@ -308,7 +419,9 @@ def mostrar_evolucion_admin():
 
     disponibles = [
 
-        c for c in columnas
+        c
+
+        for c in columnas
 
         if c in registros.columns
 
@@ -332,9 +445,25 @@ def mostrar_evolucion_admin():
         )
 
 
+
         st.line_chart(
+
             grafica
+
         )
+
+
+
+    else:
+
+
+        st.info(
+
+            "No hay datos suficientes para generar gráfica."
+
+        )
+
+
 
 
 
@@ -342,12 +471,17 @@ def mostrar_evolucion_admin():
 
 
 
+
+
     # ======================================
     # HISTORIAL
     # ======================================
 
+
     st.subheader(
+
         "📋 Historial completo"
+
     )
 
 
