@@ -7,6 +7,7 @@ from config.config import URL_GYM
 
 
 
+
 # ==========================================
 # CARGAR HISTORIAL DE PAGOS
 # ==========================================
@@ -16,12 +17,15 @@ def cargar_pagos():
 
     try:
 
+
         url = URL_GYM + "?action=pagos"
+
 
 
         respuesta = requests.get(
             url
         )
+
 
 
         datos = respuesta.json()
@@ -30,55 +34,134 @@ def cargar_pagos():
 
         if len(datos) <= 1:
 
+
             return pd.DataFrame(
+
                 columns=[
+
                     "cedula",
+
                     "nombre_completo",
+
                     "fecha_pago",
+
                     "valor",
+
                     "concepto"
+
                 ]
+
             )
 
 
 
         columnas = [
+
             "cedula",
+
             "nombre_completo",
+
             "fecha_pago",
+
             "valor",
+
             "concepto"
+
+        ]
+
+
+
+        filas = [
+
+            fila[:5]
+
+            for fila in datos[1:]
+
         ]
 
 
 
         df = pd.DataFrame(
-            datos[1:],
+
+            filas,
+
             columns=columnas
+
         )
 
 
 
+        # ==============================
+        # NORMALIZAR CÉDULA
+        # ==============================
+
+
+        if "cedula" in df.columns:
+
+
+            df["cedula"] = (
+
+                df["cedula"]
+
+                .astype(str)
+
+                .str.replace(
+
+                    ".0",
+
+                    "",
+
+                    regex=False
+
+                )
+
+                .str.strip()
+
+            )
+
+
+
+        # ==============================
+        # NORMALIZAR VALOR
+        # ==============================
+
+
         if "valor" in df.columns:
 
+
             df["valor"] = pd.to_numeric(
+
                 df["valor"],
+
                 errors="coerce"
+
             ).fillna(0)
 
 
 
+        # ==============================
+        # NORMALIZAR FECHA
+        # ==============================
+
+
         if "fecha_pago" in df.columns:
 
+
             fechas = pd.to_datetime(
+
                 df["fecha_pago"],
+
                 errors="coerce",
+
                 dayfirst=True
+
             )
 
 
             df["fecha_pago"] = fechas.dt.strftime(
+
                 "%d-%m-%Y"
+
             )
 
 
@@ -87,15 +170,21 @@ def cargar_pagos():
 
 
 
+
+
     except Exception as e:
 
 
         st.error(
+
             f"Error cargando pagos: {e}"
+
         )
 
 
         return pd.DataFrame()
+
+
 
 
 
@@ -104,40 +193,78 @@ def cargar_pagos():
 # ==========================================
 
 def registrar_pago(
+
     cedula,
+
     nombre,
+
     valor,
+
     concepto
+
 ):
+
 
     try:
 
+
         fecha_pago = datetime.today().strftime(
+
             "%d-%m-%Y"
+
         )
+
 
 
         respuesta = requests.post(
 
+
             URL_GYM,
+
 
             json={
 
-                "action":"registrar_pago",
 
-                "cedula":str(cedula),
+                "action":
 
-                "nombre_completo":nombre,
+                    "registrar_pago",
 
-                "fecha_pago":fecha_pago,
 
-                "valor":int(valor),
 
-                "concepto":concepto
+                "cedula":
+
+                    str(cedula),
+
+
+
+                "nombre_completo":
+
+                    nombre,
+
+
+
+                "fecha_pago":
+
+                    fecha_pago,
+
+
+
+                "valor":
+
+                    int(valor),
+
+
+
+                "concepto":
+
+                    concepto
+
 
             }
 
+
         )
+
 
 
         return respuesta.json()
@@ -147,10 +274,18 @@ def registrar_pago(
     except Exception as e:
 
 
+
         return {
 
-            "status":"error",
 
-            "mensaje":str(e)
+            "status":
+
+                "error",
+
+
+            "mensaje":
+
+                str(e)
+
 
         }
