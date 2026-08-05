@@ -17,6 +17,7 @@ def mostrar_dashboard():
     st.header(
         "📊 Dashboard Administrativo"
     )
+    st.error("ESTOY EJECUTANDO EL NUEVO DASHBOARD")
 
     clientes = cargar_clientes_gym()
     pagos = cargar_pagos()
