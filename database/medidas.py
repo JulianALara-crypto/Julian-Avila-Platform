@@ -20,12 +20,10 @@ def cargar_medidas():
             timeout=10
         )
 
-
         respuesta.raise_for_status()
 
 
         datos = respuesta.json()
-
 
 
         historial_raw = datos.get(
@@ -34,19 +32,20 @@ def cargar_medidas():
         )
 
 
-
-        if not historial_raw or len(historial_raw) <= 1:
+        if (
+            not historial_raw
+            or len(historial_raw) <= 1
+        ):
 
             return pd.DataFrame()
 
 
 
-        # ==================================
-        # VALIDAR ENCABEZADOS
-        # ==================================
+        encabezados = historial_raw[0]
+
 
         if not isinstance(
-            historial_raw[0],
+            encabezados,
             list
         ):
 
@@ -55,52 +54,56 @@ def cargar_medidas():
 
 
         # ==================================
-        # NORMALIZAR COLUMNAS
-        # Y EVITAR DUPLICADOS
+        # NORMALIZAR NOMBRES DE COLUMNAS
         # ==================================
-
-        columnas_originales = [
-
-            str(c)
-            .strip()
-            .lower()
-
-            for c in historial_raw[0]
-
-        ]
-
-
 
         columnas = []
 
 
-        for columna in columnas_originales:
+        for columna in encabezados:
 
 
-            nombre = columna
+            nombre = (
 
+                str(columna)
 
-            contador = 1
+                .strip()
 
+                .lower()
 
+                .replace(
+                    " ",
+                    "_"
+                )
 
-            while nombre in columnas:
-
-                contador += 1
-
-                nombre = f"{columna}_{contador}"
-
-
-
-            columnas.append(
-                nombre
             )
 
 
+            # Evitar columnas duplicadas
 
-        # ==================================
-        # CREAR DATAFRAME
-        # ==================================
+            if nombre in columnas:
+
+                contador = 2
+
+                nuevo_nombre = f"{nombre}_{contador}"
+
+
+                while nuevo_nombre in columnas:
+
+                    contador += 1
+
+                    nuevo_nombre = (
+                        f"{nombre}_{contador}"
+                    )
+
+
+                nombre = nuevo_nombre
+
+
+
+            columnas.append(nombre)
+
+
 
         df = pd.DataFrame(
 
@@ -109,6 +112,18 @@ def cargar_medidas():
             columns=columnas
 
         )
+
+
+
+        # ==================================
+        # ELIMINAR COLUMNAS COMPLETAMENTE
+        # DUPLICADAS
+        # ==================================
+
+        df = df.loc[
+            :,
+            ~df.columns.duplicated()
+        ]
 
 
 
@@ -180,7 +195,7 @@ def cargar_medidas():
 
 
 # ==========================================
-# FILTRAR MEDIDAS DE CLIENTE
+# OBTENER MEDIDAS DE UN CLIENTE
 # ==========================================
 
 def obtener_medidas_cliente(
