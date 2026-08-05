@@ -10,7 +10,7 @@ from config.config import URL_USUARIOS
 # CARGAR HISTORIAL DE MEDIDAS
 # ==========================================
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=1)
 def cargar_medidas():
 
     try:
