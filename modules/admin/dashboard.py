@@ -21,7 +21,6 @@ def mostrar_dashboard():
     )
 
 
-
     # ======================================
     # CARGAR DATOS
     # ======================================
@@ -37,7 +36,7 @@ def mostrar_dashboard():
 
 
     # ======================================
-    # DEPURACIÓN TEMPORAL PAGOS
+    # DEBUG PAGOS TEMPORAL
     # ======================================
 
     st.subheader(
@@ -45,52 +44,95 @@ def mostrar_dashboard():
     )
 
 
-    st.write(
-        "Columnas:"
-    )
+    if pagos.empty:
 
+        st.warning(
+            "No hay pagos cargados."
+        )
 
-    st.write(
-        pagos.columns.tolist()
-    )
-
-
-    st.write(
-        "Datos completos:"
-    )
-
-
-    st.dataframe(
-        pagos,
-        use_container_width=True,
-        hide_index=True
-    )
-
-
-
-    if (
-        not pagos.empty
-        and "valor" in pagos.columns
-    ):
+    else:
 
 
         st.write(
-            "Valores recibidos:"
+            "Columnas detectadas:"
+        )
+
+        st.write(
+            pagos.columns.tolist()
         )
 
 
         st.write(
-            pagos["valor"].tolist()
+            "Datos de pagos:"
+        )
+
+        st.dataframe(
+
+            pagos,
+
+            use_container_width=True,
+
+            hide_index=True
+
         )
 
 
         st.write(
-            "Suma calculada:"
+            "Valores que está usando el cálculo:"
+        )
+
+
+        if "valor" in pagos.columns:
+
+
+            st.dataframe(
+
+                pagos[
+                    [
+                        "cedula",
+                        "nombre_completo",
+                        "valor"
+                    ]
+                ],
+
+                use_container_width=True,
+
+                hide_index=True
+
+            )
+
+
+            st.write(
+                "Lista de valores:"
+            )
+
+
+            st.write(
+
+                pagos["valor"].tolist()
+
+            )
+
+
+            st.write(
+                "Suma actual:"
+            )
+
+
+            st.write(
+
+                pagos["valor"].sum()
+
+            )
+
+
+        st.write(
+            "Tipos de datos:"
         )
 
 
         st.write(
-            pagos["valor"].sum()
+            pagos.dtypes
         )
 
 
@@ -101,6 +143,7 @@ def mostrar_dashboard():
 
     if clientes.empty:
 
+
         st.info(
             "No hay información registrada todavía."
         )
@@ -110,7 +153,7 @@ def mostrar_dashboard():
 
 
     # ======================================
-    # MÉTRICAS
+    # MÉTRICAS PRINCIPALES
     # ======================================
 
     total_clientes = len(clientes)
@@ -181,29 +224,29 @@ def mostrar_dashboard():
 
 
 
-    c1, c2, c3, c4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4)
 
 
 
-    c1.metric(
+    col1.metric(
         "👥 Clientes",
         total_clientes
     )
 
 
-    c2.metric(
+    col2.metric(
         "💰 Ingresos",
         f"${int(ingresos):,}"
     )
 
 
-    c3.metric(
+    col3.metric(
         "🏋️ Planes activos",
         planes_activos
     )
 
 
-    c4.metric(
+    col4.metric(
         "📈 Evaluaciones",
         total_medidas
     )
@@ -250,7 +293,6 @@ def mostrar_dashboard():
                 errors="coerce"
 
             )
-
 
 
             tabla = (
@@ -413,7 +455,7 @@ def mostrar_dashboard():
 
 
     # ======================================
-    # CLIENTES
+    # CLIENTES REGISTRADOS
     # ======================================
 
     st.subheader(
