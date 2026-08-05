@@ -6,19 +6,17 @@ from config.config import URL_USUARIOS
 
 
 
-# ==========================================
-# CARGAR HISTORIAL DE MEDIDAS
-# ==========================================
-
 @st.cache_data(ttl=300)
 def cargar_medidas():
 
     try:
 
         respuesta = requests.get(
-            URL_USUARIOS
+            URL_USUARIOS,
+            timeout=10
         )
 
+        respuesta.raise_for_status()
 
         datos = respuesta.json()
 
@@ -29,8 +27,15 @@ def cargar_medidas():
         )
 
 
-        if len(historial_raw) <= 1:
+        if (
+            not historial_raw
+            or len(historial_raw) <= 1
+        ):
+            return pd.DataFrame()
 
+
+
+        if not isinstance(historial_raw[0], list):
             return pd.DataFrame()
 
 
@@ -47,9 +52,6 @@ def cargar_medidas():
         )
 
 
-
-        # Normalizar cédulas
-
         if "cedula" in df.columns:
 
             df["cedula"] = (
@@ -63,8 +65,6 @@ def cargar_medidas():
                 .str.strip()
             )
 
-
-        # Fechas formato plataforma
 
         if "fecha_evaluacion" in df.columns:
 
@@ -85,32 +85,27 @@ def cargar_medidas():
 
     except Exception as e:
 
-
         st.error(
             f"Error cargando medidas: {e}"
         )
 
-
         return pd.DataFrame()
 
 
-
-# ==========================================
-# FILTRAR MEDIDAS DE CLIENTE
-# ==========================================
 
 def obtener_medidas_cliente(
     cedula
 ):
 
-
     df = cargar_medidas()
 
 
     if df.empty:
-
         return pd.DataFrame()
 
+
+    if "cedula" not in df.columns:
+        return pd.DataFrame()
 
 
     return df[
