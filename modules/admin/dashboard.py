@@ -32,6 +32,24 @@ def mostrar_dashboard():
         return
 
     # ======================================
+    # DEPURACIÓN (TEMPORAL)
+    # ======================================
+
+    st.subheader("🔍 Depuración de pagos")
+
+    st.write("Columnas de pagos:")
+    st.write(pagos.columns.tolist())
+
+    st.write("Contenido de pagos:")
+    st.dataframe(
+        pagos,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.divider()
+
+    # ======================================
     # MÉTRICAS PRINCIPALES
     # ======================================
 
