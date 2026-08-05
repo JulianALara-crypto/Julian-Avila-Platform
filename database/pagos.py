@@ -16,9 +16,7 @@ def cargar_pagos():
 
     try:
 
-
         url = URL_GYM + "?action=pagos"
-
 
 
         respuesta = requests.get(
@@ -50,10 +48,11 @@ def cargar_pagos():
 
 
 
-        if (
-            not datos
-            or len(datos) <= 1
-        ):
+        # ==================================
+        # SIN DATOS
+        # ==================================
+
+        if not datos:
 
             return pd.DataFrame(
                 columns=columnas
@@ -61,27 +60,28 @@ def cargar_pagos():
 
 
 
-        filas = []
+        # ==================================
+        # CONVERTIR JSON A DATAFRAME
+        # ==================================
 
-
-        for fila in datos[1:]:
-
-
-            if len(fila) >= 5:
-
-                filas.append(
-                    fila[:5]
-                )
+        df = pd.DataFrame(datos)
 
 
 
-        df = pd.DataFrame(
+        # Crear columnas faltantes
 
-            filas,
+        for columna in columnas:
 
-            columns=columnas
+            if columna not in df.columns:
 
-        )
+                df[columna] = ""
+
+
+
+        # Orden correcto
+
+        df = df[columnas]
+
 
 
 
@@ -95,73 +95,74 @@ def cargar_pagos():
 
 
 
-        if "cedula" in df.columns:
+        # ==================================
+        # LIMPIAR CÉDULA
+        # ==================================
 
-            df["cedula"] = (
+        df["cedula"] = (
 
-                df["cedula"]
+            df["cedula"]
 
-                .astype(str)
+            .astype(str)
 
-                .str.replace(
-                    ".0",
-                    "",
-                    regex=False
-                )
-
-                .str.strip()
-
+            .str.replace(
+                ".0",
+                "",
+                regex=False
             )
+
+            .str.strip()
+
+        )
 
 
 
         # ==================================
-        # LIMPIAR VALOR DEL PAGO
+        # LIMPIAR VALOR
         # ==================================
 
-        if "valor" in df.columns:
+        df["valor"] = (
 
+            df["valor"]
 
-            df["valor"] = (
+            .astype(str)
 
-                df["valor"]
-
-                .astype(str)
-
-                .str.replace(
-                    "$",
-                    "",
-                    regex=False
-                )
-
-                .str.replace(
-                    " ",
-                    "",
-                    regex=False
-                )
-
-                .str.replace(
-                    ".",
-                    "",
-                    regex=False
-                )
-
-                .str.replace(
-                    ",",
-                    "",
-                    regex=False
-                )
-
+            .str.replace(
+                "$",
+                "",
+                regex=False
             )
 
+            .str.replace(
+                " ",
+                "",
+                regex=False
+            )
 
-            df["valor"] = pd.to_numeric(
+            .str.replace(
+                ".",
+                "",
+                regex=False
+            )
 
-                df["valor"],
+            .str.replace(
+                ",",
+                "",
+                regex=False
+            )
 
-                errors="coerce"
+        )
 
-            ).fillna(0)
+
+
+        df["valor"] = pd.to_numeric(
+
+            df["valor"],
+
+            errors="coerce"
+
+        ).fillna(0)
+
 
 
 
@@ -169,33 +170,24 @@ def cargar_pagos():
         # LIMPIAR FECHAS
         # ==================================
 
-        if "fecha_pago" in df.columns:
+        df["fecha_pago"] = pd.to_datetime(
 
+            df["fecha_pago"],
 
-            fechas = pd.to_datetime(
+            errors="coerce",
 
-                df["fecha_pago"],
+            dayfirst=True
 
-                errors="coerce",
+        ).dt.strftime(
 
-                dayfirst=True
+            "%d-%m-%Y"
 
-            )
-
-
-            df["fecha_pago"] = (
-
-                fechas
-
-                .dt.strftime(
-                    "%d-%m-%Y"
-                )
-
-            )
+        )
 
 
 
         return df
+
 
 
 
@@ -243,6 +235,23 @@ def registrar_pago(
 
 
 
+        fila = [
+
+            str(cedula),
+
+            nombre,
+
+            fecha_pago,
+
+            int(valor),
+
+            concepto
+
+        ]
+
+
+
+
         respuesta = requests.post(
 
             URL_GYM,
@@ -254,29 +263,9 @@ def registrar_pago(
                     "registrar_pago",
 
 
-                "cedula":
+                "row":
 
-                    str(cedula),
-
-
-                "nombre_completo":
-
-                    nombre,
-
-
-                "fecha_pago":
-
-                    fecha_pago,
-
-
-                "valor":
-
-                    int(valor),
-
-
-                "concepto":
-
-                    concepto
+                    fila
 
             },
 
@@ -285,7 +274,9 @@ def registrar_pago(
         )
 
 
+
         return respuesta.json()
+
 
 
 
@@ -299,7 +290,7 @@ def registrar_pago(
                 "error",
 
 
-            "mensaje":
+            "message":
 
                 str(e)
 
