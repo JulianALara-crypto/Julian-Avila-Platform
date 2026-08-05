@@ -15,9 +15,11 @@ from database.medidas import cargar_medidas
 
 def mostrar_dashboard():
 
+
     st.header(
         "📊 Dashboard Administrativo"
     )
+
 
 
     # ======================================
@@ -34,6 +36,69 @@ def mostrar_dashboard():
 
 
 
+    # ======================================
+    # DEPURACIÓN TEMPORAL PAGOS
+    # ======================================
+
+    st.subheader(
+        "🔍 DEBUG PAGOS"
+    )
+
+
+    st.write(
+        "Columnas:"
+    )
+
+
+    st.write(
+        pagos.columns.tolist()
+    )
+
+
+    st.write(
+        "Datos completos:"
+    )
+
+
+    st.dataframe(
+        pagos,
+        use_container_width=True,
+        hide_index=True
+    )
+
+
+
+    if (
+        not pagos.empty
+        and "valor" in pagos.columns
+    ):
+
+
+        st.write(
+            "Valores recibidos:"
+        )
+
+
+        st.write(
+            pagos["valor"].tolist()
+        )
+
+
+        st.write(
+            "Suma calculada:"
+        )
+
+
+        st.write(
+            pagos["valor"].sum()
+        )
+
+
+
+    st.divider()
+
+
+
     if clientes.empty:
 
         st.info(
@@ -45,22 +110,22 @@ def mostrar_dashboard():
 
 
     # ======================================
-    # MÉTRICAS PRINCIPALES
+    # MÉTRICAS
     # ======================================
 
     total_clientes = len(clientes)
 
 
 
-    # INGRESOS
-
     ingresos = 0
+
 
 
     if (
         not pagos.empty
         and "valor" in pagos.columns
     ):
+
 
         ingresos = (
 
@@ -83,10 +148,12 @@ def mostrar_dashboard():
     planes_activos = 0
 
 
+
     if (
         not planes.empty
         and "estado" in planes.columns
     ):
+
 
         planes_activos = len(
 
@@ -108,33 +175,35 @@ def mostrar_dashboard():
 
 
 
-    total_medidas = len(medidas)
+    total_medidas = len(
+        medidas
+    )
 
 
 
-    col1, col2, col3, col4 = st.columns(4)
+    c1, c2, c3, c4 = st.columns(4)
 
 
 
-    col1.metric(
+    c1.metric(
         "👥 Clientes",
         total_clientes
     )
 
 
-    col2.metric(
+    c2.metric(
         "💰 Ingresos",
         f"${int(ingresos):,}"
     )
 
 
-    col3.metric(
+    c3.metric(
         "🏋️ Planes activos",
         planes_activos
     )
 
 
-    col4.metric(
+    c4.metric(
         "📈 Evaluaciones",
         total_medidas
     )
@@ -154,8 +223,8 @@ def mostrar_dashboard():
     )
 
 
-
     if pagos.empty:
+
 
         st.info(
             "No existen pagos registrados."
@@ -181,6 +250,7 @@ def mostrar_dashboard():
                 errors="coerce"
 
             )
+
 
 
             tabla = (
@@ -230,7 +300,6 @@ def mostrar_dashboard():
     )
 
 
-
     if planes.empty:
 
 
@@ -243,7 +312,6 @@ def mostrar_dashboard():
 
 
         hoy = datetime.today()
-
 
 
         proximos = planes.copy()
@@ -262,7 +330,6 @@ def mostrar_dashboard():
                 errors="coerce"
 
             )
-
 
 
             proximos["dias_restantes"] = (
@@ -308,11 +375,11 @@ def mostrar_dashboard():
         else:
 
 
-            columnas_mostrar = [
+            columnas = [
 
-                columna
+                c
 
-                for columna in [
+                for c in [
 
                     "nombre_completo",
 
@@ -324,15 +391,14 @@ def mostrar_dashboard():
 
                 ]
 
-                if columna in proximos.columns
+                if c in proximos.columns
 
             ]
 
 
-
             st.dataframe(
 
-                proximos[columnas_mostrar],
+                proximos[columnas],
 
                 use_container_width=True,
 
@@ -347,13 +413,12 @@ def mostrar_dashboard():
 
 
     # ======================================
-    # CLIENTES REGISTRADOS
+    # CLIENTES
     # ======================================
 
     st.subheader(
         "👥 Clientes registrados"
     )
-
 
 
     st.dataframe(
