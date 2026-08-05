@@ -15,6 +15,7 @@ from database.medidas import cargar_medidas
 
 def mostrar_dashboard():
 
+    st.error("PRUEBA DASHBOARD NUEVO")
 
     st.header(
         "📊 Dashboard Administrativo"
