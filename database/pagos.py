@@ -7,7 +7,6 @@ from config.config import URL_GYM
 
 
 
-
 # ==========================================
 # CARGAR HISTORIAL DE PAGOS
 # ==========================================
@@ -23,35 +22,15 @@ def cargar_pagos():
 
 
         respuesta = requests.get(
-            url
+            url,
+            timeout=10
         )
 
 
+        respuesta.raise_for_status()
+
 
         datos = respuesta.json()
-
-
-
-        if len(datos) <= 1:
-
-
-            return pd.DataFrame(
-
-                columns=[
-
-                    "cedula",
-
-                    "nombre_completo",
-
-                    "fecha_pago",
-
-                    "valor",
-
-                    "concepto"
-
-                ]
-
-            )
 
 
 
@@ -71,13 +50,28 @@ def cargar_pagos():
 
 
 
-        filas = [
+        if (
+            not datos
+            or len(datos) <= 1
+        ):
 
-            fila[:5]
+            return pd.DataFrame(
+                columns=columnas
+            )
 
-            for fila in datos[1:]
 
-        ]
+
+        filas = []
+
+
+        for fila in datos[1:]:
+
+
+            if len(fila) >= 5:
+
+                filas.append(
+                    fila[:5]
+                )
 
 
 
@@ -91,13 +85,17 @@ def cargar_pagos():
 
 
 
-        # ==============================
-        # NORMALIZAR CÉDULA
-        # ==============================
+        # ==================================
+        # LIMPIAR FILAS VACÍAS
+        # ==================================
+
+        df = df.dropna(
+            how="all"
+        )
+
 
 
         if "cedula" in df.columns:
-
 
             df["cedula"] = (
 
@@ -106,13 +104,9 @@ def cargar_pagos():
                 .astype(str)
 
                 .str.replace(
-
                     ".0",
-
                     "",
-
                     regex=False
-
                 )
 
                 .str.strip()
@@ -121,12 +115,44 @@ def cargar_pagos():
 
 
 
-        # ==============================
-        # NORMALIZAR VALOR
-        # ==============================
-
+        # ==================================
+        # LIMPIAR VALOR DEL PAGO
+        # ==================================
 
         if "valor" in df.columns:
+
+
+            df["valor"] = (
+
+                df["valor"]
+
+                .astype(str)
+
+                .str.replace(
+                    "$",
+                    "",
+                    regex=False
+                )
+
+                .str.replace(
+                    " ",
+                    "",
+                    regex=False
+                )
+
+                .str.replace(
+                    ".",
+                    "",
+                    regex=False
+                )
+
+                .str.replace(
+                    ",",
+                    "",
+                    regex=False
+                )
+
+            )
 
 
             df["valor"] = pd.to_numeric(
@@ -139,10 +165,9 @@ def cargar_pagos():
 
 
 
-        # ==============================
-        # NORMALIZAR FECHA
-        # ==============================
-
+        # ==================================
+        # LIMPIAR FECHAS
+        # ==================================
 
         if "fecha_pago" in df.columns:
 
@@ -158,16 +183,19 @@ def cargar_pagos():
             )
 
 
-            df["fecha_pago"] = fechas.dt.strftime(
+            df["fecha_pago"] = (
 
-                "%d-%m-%Y"
+                fechas
+
+                .dt.strftime(
+                    "%d-%m-%Y"
+                )
 
             )
 
 
 
         return df
-
 
 
 
@@ -183,7 +211,6 @@ def cargar_pagos():
 
 
         return pd.DataFrame()
-
 
 
 
@@ -218,17 +245,13 @@ def registrar_pago(
 
         respuesta = requests.post(
 
-
             URL_GYM,
 
-
             json={
-
 
                 "action":
 
                     "registrar_pago",
-
 
 
                 "cedula":
@@ -236,11 +259,9 @@ def registrar_pago(
                     str(cedula),
 
 
-
                 "nombre_completo":
 
                     nombre,
-
 
 
                 "fecha_pago":
@@ -248,23 +269,20 @@ def registrar_pago(
                     fecha_pago,
 
 
-
                 "valor":
 
                     int(valor),
-
 
 
                 "concepto":
 
                     concepto
 
+            },
 
-            }
-
+            timeout=10
 
         )
-
 
 
         return respuesta.json()
@@ -274,9 +292,7 @@ def registrar_pago(
     except Exception as e:
 
 
-
         return {
-
 
             "status":
 
@@ -286,6 +302,5 @@ def registrar_pago(
             "mensaje":
 
                 str(e)
-
 
         }
