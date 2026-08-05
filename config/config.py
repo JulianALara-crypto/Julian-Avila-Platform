@@ -25,7 +25,7 @@ URL_USUARIOS = (
 # Gestión gimnasio
 
 URL_GYM = (
-    "https://script.google.com/macros/s/AKfycbwkP0xrnFx2rhHI9M5DEsW47v_2GSIS9uxMJ-K3wAHEIryIyhEG_eGHKKIf2Im0SppL/exec"
+    "https://script.google.com/macros/s/AKfycbw4une2l9UYi8XT_LMUQ6PRXbb4fYMHBvY0RhWSBmk322KD2xRqcTOJnsJ09AfipWM/exec"
 )
 
 
