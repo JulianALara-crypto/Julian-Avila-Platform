@@ -2731,7 +2731,7 @@ def _estado_pago_cliente(df_pagos, cedula):
         if not vals.empty:
             mensualidad = float(vals.iloc[-1])
     if mensualidad <= 0:
-        mensualidad = 250000.0
+        mensualidad = 400000.0
     pagado = float(pd.to_numeric(mes.get("valor", 0), errors="coerce").fillna(0).sum()) if not mes.empty else 0.0
     saldo = max(mensualidad - pagado, 0.0)
     estado = "🟢 PAGADO" if saldo <= 0.001 else ("🟡 ABONO" if pagado > 0 else "🔴 PENDIENTE")
